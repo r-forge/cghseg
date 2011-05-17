@@ -1,0 +1,24 @@
+CGHdata-class           Class "CGHdata"
+CGHoptions-class        Class "CGHoptions"
+CGHresults-class        Class "CGHresults"
+GCnorm<-                Replace slot GCnorm
+alpha<-                 Replace slot alpha
+beta<-                  Replace slot beta
+calling<-               Replace slot calling
+getbgoutliers           getbgoutliers
+getbp                   Breakpoints frequencies
+getlevels               Levels frequency
+getmultiKmax            Determining the maximum number of segments for
+                        joint segmentation
+getsegprofiles          getsegprofiles
+getuniKmax              Maximum number of segments per profile
+itermax<-               Replace slot itermax
+lmax<-                  Replace slot lmax
+lmin<-                  Replace slot lmin
+multiseg                Joint segmentation of multiple CGH profiles
+nblevels<-              Replace slot nblevels
+plot                    Plots a CGHdata and a CGHresults object
+select<-                Replace slot select
+simulprofiles           simulprofiles
+uniseg                  Segmentation of univariate CGH profiles
+wavenorm<-              Replace slot wavenorm
