@@ -64,7 +64,7 @@ Objects can be created by calls of the form \code{new("CGHoptions")}.
 \references{Joint segmentation, calling and normalization of multiple CGH profiles, Biostatistics (2011)}
 \author{F. Picard, E. Lebarbier, M. Hoebeke, G. Rigaill, B. Thiam, S. Robin}
 \examples{
-CGHo = new("CGHoptions")
-showClass("CGHoptions")
+#CGHo = new("CGHoptions")
+#showClass("CGHoptions")
 }
 \keyword{classes}

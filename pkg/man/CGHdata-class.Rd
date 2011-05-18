@@ -53,10 +53,10 @@
 \references{Joint segmentation, calling and normalization of multiple CGH profiles, Biostatistics (2011)}
 \author{F. Picard, E. Lebarbier, M. Hoebeke, G. Rigaill, B. Thiam, S. Robin}
 \examples{
-set.seed(1)
-simul          = simulprofiles(M=5,n=100,k.mean=2,SNR=5,lambda=1)
-CGHd           = new("CGHdata",Y=simul$Y)
-show(CGHd)
-summary(CGHd)
+#set.seed(1)
+#simul          = simulprofiles(M=5,n=100,k.mean=2,SNR=5,lambda=1)
+#CGHd           = new("CGHdata",Y=simul$Y)
+#show(CGHd)
+#summary(CGHd)
 }
 \keyword{classes}
