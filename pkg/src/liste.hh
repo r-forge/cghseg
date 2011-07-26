@@ -18,7 +18,8 @@
 */
 
 #include "polynome2.hh"
-#include <gsl/gsl_math.h>
+#include "numlib.h"
+
 
 class Liste {
  private:

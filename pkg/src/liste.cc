@@ -200,8 +200,8 @@ void Liste::add(double a2_, double a1_, double a0_)
 void Liste::computeMinOrMax(double * min, int * which)
 {
 	Liste *l;
-	double tmp = GSL_POSINF;
-	*min = GSL_POSINF;
+	double tmp = NUMLIB_POSINF;
+	*min = NUMLIB_POSINF;
 	* which=-1;
 	l=this;
 	while(l != NULL)
