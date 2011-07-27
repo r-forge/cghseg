@@ -3,6 +3,7 @@ Type: Package
 Title: Segmentation methods for array CGH analysis
 Version: 0.01
 Depends: methods
+SystemRequirements: GNU GSL
 Date: 2010-05-20
 Author:Franck Picard, Mark Hoebeke, Emilie Lebarbier, Guillem Rigaill, Stephane Robin
 Maintainer: Franck Picard <franck.picard@univ-lyon1.fr>
