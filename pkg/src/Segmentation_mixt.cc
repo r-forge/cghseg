@@ -7,66 +7,14 @@
 #include <math.h>
 #include <cstring>
 #include <limits>
+#include <vector>
+
 
 using namespace std;
 
 namespace cghseg
 {
-ostream & operator << (ostream &s, const Segmentation_mixt &Seg_mixt)
-{
-/**
-  s << "nMax = " << Seg_mixt._lengthx << endl;
-  s << "Kmax = " << Seg_mixt._Kmax << endl;
-  s << "Affichage des donnees : " << endl;
-  for (int i = 0; i < Seg_mixt._lengthx; i++)
-    s << Seg_mixt._x[i] << " ";
-  s << endl;
 
-  s << "Affichage de la matrice _Cost : " << endl;
-  for (int i = 0; i < Seg_mixt._lengthx-Seg_mixt._lmin+1; i++)
-  {
-    for (int j = 0; j < i + 1; j++)
-      s << Seg_mixt._Cost[i][j] << "\t";
-    s << endl;
-  }
-
-  s << "Affichage de la matrice _D[k][i] : " << endl;
-  for (int k = 0; k < Seg_mixt._Kmax; k++)
-  {
-    for (int i = 0; i < Seg_mixt._lengthx - (k+1)* Seg_mixt._lmin +1; i++)
-      s << Seg_mixt._D[k][i] << "\t";
-    s << endl;
-  }
-
-  s << "Affichage du contraste : " << endl;
-  {
-    for (int j = 0; j < Seg_mixt._Kmax; j++)
-      s << Seg_mixt._D[Seg_mixt._lengthx-1][j] << " ";
-    s << endl;
-  }
-
-  s << "Affichage de la matrice des ruptures : " << endl;
-  for (int k = 0; k < Seg_mixt._Kmax-1; k++)
-  {
-    for (int i = 0; i < Seg_mixt._lengthx - (k+2)* Seg_mixt._lmin+1; i++)
-      s << Seg_mixt._Breaks[k][i] << " ";
-    s << endl;
-  }
-
-  s << "Affichage de la matrice des meilleures ruptures : " << endl;
-  for (int k = 0; k < Seg_mixt._Kmax; k++)
-  {
-    for (int l = 0; l < k + 1; l++)
-      s << Seg_mixt._BestBreaks[k][l] << " ";
-    s << endl;
-  }
-
-  return s;
-**/
-}
-
-
-// Reccurrence : calculates level k, assuming that level (k - 1) has already been done
   void Segmentation_mixt::DynProg(int k)
 {
   int t = min((k+1)*_lmax, _lengthx);
@@ -147,14 +95,16 @@ void Segmentation_mixt::Init(double *Data, double *param)
       y2kbar /= ni;
       wk      = y2kbar - ykbar*ykbar ;
 
-      
+     
+      vector<double> dkp(_P, 0);  
 
-      double dkp[_P];
+
 
       for (int p=0; p<_P; p++) 
         dkp[p] = (ykbar - _phi[p])*(ykbar - _phi[p]);
 
-      double fyk[_P];
+      vector<double> fyk(_P, 0);  
+
       for (int p=0; p<_P; p++) 
       {
         fyk[p] = 0.5* ni * (-(dkp[p]+wk)/(_phi[_P+p]*_phi[_P+p]) -log(2*pi*_phi[_P+p]*_phi[_P+p]) ) + log(_phi[2*_P+p]);
@@ -199,12 +149,12 @@ void Segmentation_mixt::Init(double *Data, double *param)
 	    y2kbar /= ni;
 	    wk      = y2kbar - ykbar*ykbar ;
 	    
-	    double dkp[_P];
+	    vector<double> dkp(_P, 0);  
 	    
 	    for (int p=0; p<_P; p++) 
 	      dkp[p] = (ykbar - _phi[p])*(ykbar - _phi[p]);
 	    
-	    double fyk[_P];
+	    vector<double> fyk(_P, 0);  
 	    for (int p=0; p<_P; p++) 
 	      {
 		fyk[p] = 0.5* ni * (-(dkp[p]+wk)/(_phi[_P+p]*_phi[_P+p]) -log(2*pi*_phi[_P+p]*_phi[_P+p]) ) + log(_phi[2*_P+p]);

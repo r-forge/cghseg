@@ -21,7 +21,7 @@ namespace cghseg
 {
 
   void EM_init::compute_phi(){
-    int index[_K];
+    vector<int> index(_K, 0);  
     for (int k=0;k<_K;k++)
       index[k] = 0;
     for (int k=0;k<_K;k++){

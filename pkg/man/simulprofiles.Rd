@@ -3,7 +3,7 @@
 \title{simulprofiles}
 \description{Simulates multiple CGH profiles}
 \usage{
-simul = simulprofiles(M, n,k.mean,SNR,lambda)
+simulprofiles(M, n,k.mean,SNR,lambda)
 }
 \arguments{
   \item{M}{Number of profiles}

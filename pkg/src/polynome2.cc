@@ -17,7 +17,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include "polynome2.hh"
+#include "polynome2.h"
 
 /* Class Definition */
 

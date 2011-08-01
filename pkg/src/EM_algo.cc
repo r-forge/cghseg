@@ -2,6 +2,7 @@
 //#include <fstream>
 #include <list>
 #include <cmath>
+#include <vector>
 #include <math.h>
 #include <cstdlib>
 #include <memory>
@@ -14,14 +15,14 @@ namespace cghseg
   
   void EM_algo::Estep(){
     
-    // fill _logdens
     double pi = acos(-1);
-    double max[_K];
+    vector<double> max(_K, 0);  
+
     
     for (int k = 0 ;  k < _K; k++){
       int nk     = _Breaks[k+1]-_Breaks[k];
       double dkp = 0;
-      double logfxk[_P];
+      vector<double> logfxk(_P, 0);  
       for (int p=0; p<_P; p++) {
 	dkp = (_xkbar[k] - _phi[p])*(_xkbar[k] - _phi[p]);
 	logfxk[p] = 0.5* nk * (-(dkp+_wk[k])/(_phi[_P+p]*_phi[_P+p]) -log(2*pi*_phi[_P+p]*_phi[_P+p]) )+ log(_phi[2*_P+p]);                          
@@ -111,13 +112,13 @@ namespace cghseg
   
   void EM_algo::EM(){
 
-    double delta[3*_P];
+    vector<double> delta(3*_P, 0);  
     double maxdelta = 1e-4;
     
     int iter        = 0;
-    double np[_P];
+    vector<double> np(_P, 0);  
     double eps      = 10e-10;
-    double phi_tmp[3*_P];
+    vector<double> phi_tmp(3*_P, 0);  
     double min_np = _lengthx;
     
     for (int p=0; p<_P; p++){

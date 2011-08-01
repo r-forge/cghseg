@@ -18,7 +18,7 @@
 */
 //#include <R.h>
 //#include <Rinternals.h>
-#include "colibri.hh"
+#include "colibri.h"
 
 /* argv 1 filein, 2 fileout, 3 fileoutint, 4 nb, 5 Kmax, 6 outPathFile */
 

@@ -1,4 +1,4 @@
-#include "colibri.hh"
+#include "colibri.h"
 
 extern "C" {
 
