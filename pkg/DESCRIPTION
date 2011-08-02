@@ -1,7 +1,7 @@
 Package: cghseg
 Type: Package
 Title: Segmentation methods for array CGH analysis
-Version: 0.01
+Version: 0.0.1
 Depends: methods
 SystemRequirements: GNU GSL
 Date: 2010-05-20
