@@ -1,7 +1,7 @@
 setMethod(f = "ILS",signature = "CGHdata",
           definition = function(.Object,CGHo,uniKmax,multiKmax){
 
-            tol          = 1e-6
+            tol          = 1e-2
             select.tmp   = CGHo["select"]
             select(CGHo) = "none"
             command      = parse(text = "invisible(list(mu = mu, theta = B,loglik = loglik,nbiter = iter))")

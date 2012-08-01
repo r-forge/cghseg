@@ -35,18 +35,14 @@ setMethod(f = "multisegmean",signature = "CGHdata",
               multiKselect = multiKmax
               dimll        = length(multiloglik)
             } else if (select.tmp=="mBIC"){    
-              mBIC = c()
-              i    = 0
-              for (K in Kseq){
-                i       = i+1
+              mBIC = sapply(Kseq,FUN=function(K){
                 mu      = multisegout(.Object,seg.rep,Res,K)
-                mBIC[i] = getmBIC(K,multiloglik[i],mu,CGHo)        
-              }
+                getmBIC(K,multiloglik[K-M+1],mu,CGHo)     
+              })
               multiKselect = Kseq[which.max(mBIC)]
               dimll        = multiKselect
             }
-            
-            
+                        
 ######   Outputs   
             
             mu           = multisegout(.Object,seg.rep,Res,multiKselect)

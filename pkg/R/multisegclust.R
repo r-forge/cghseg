@@ -2,7 +2,7 @@ setMethod(f = "multisegclust",signature = "CGHdata",
           definition = function(.Object,CGHo,uniKmax,multiKmax){
 
             P            = CGHo["nblevels"]
-            tol          = 1e-6
+            tol          = 1e-2
             select.tmp   = CGHo["select"]
             select(CGHo) = "none"
             command      = parse(text = "mu = multisegclust.output(.Object,mu,out.EM$phi,out.EM$tau) \n invisible(list(mu = mu, loglik = loglik,nbiter = iter))")
@@ -40,8 +40,6 @@ setMethod(f = "multisegclust",signature = "CGHdata",
             param$t       = pred
             param.dot.tm2 = param$t
 
-
-            
             while ( (eps > tol) & (iter < CGHo@itermax) ){    
 
               iter      = iter+1              
@@ -64,6 +62,7 @@ setMethod(f = "multisegclust",signature = "CGHdata",
               eps           = sum( (param.dot.tm1-param.dot.tm2)^2 )
               if (is.nan(eps)) {eps=0} 
               param.dot.tm2 = param.dot.tm1
+
               
             } # end while
             

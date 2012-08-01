@@ -2,7 +2,7 @@ setMethod(f = "ILSclust",signature = "CGHdata",
           definition = function(.Object,CGHo,uniKmax,multiKmax){
 
             P            = CGHo["nblevels"]
-            tol          = 1e-6
+            tol          = 1e-2
             select.tmp   = CGHo["select"]
             select(CGHo) = "none"
             options(warn=-1)
@@ -52,10 +52,7 @@ setMethod(f = "ILSclust",signature = "CGHdata",
             
             
             while (  (eps > tol) & (iter < CGHo@itermax) ){
-              
               iter                = iter+1
-
-
               B                   = getbias(.Object,CGHo,mu,B,out.EM$phi,out.EM$tau)
               removebias(.Object) = B$waveffect+B$GCeffect
               mu                  = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi)$mu

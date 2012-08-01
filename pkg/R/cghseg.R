@@ -4,6 +4,27 @@
 ##########
 #########################################################################################################
 
+
+ClassiSeg <- function(geno, grille, Kmax){
+	nRow <- length(geno)
+	nGrille <- length(grille)
+      	### Appel C
+	A <- .C("ClassiSeg",as.double(geno), as.integer(nRow), as.integer(Kmax),  res1=double(Kmax*nRow), res2=integer(Kmax*nRow), as.integer(nGrille), moyennes=as.double(grille), PACKAGE="cghseg")
+	A$res1 <- matrix(A$res1, nrow=Kmax, byrow=TRUE)
+	A$res2 <- matrix(A$res2, nrow=Kmax, byrow=TRUE)
+	n <- ncol(A$res1)
+	res3 <- matrix(NA, nrow=nrow(A$res2), ncol=nrow(A$res2))
+	res3[1, 1] <- 0
+	for(i in 2: nrow(A$res2)){
+		res3[i, i-1] <- A$res2[i, n]
+		for(k in 1:(i-1)){
+		res3[i, i-1-k] <- A$res2[i-k, res3[i, i-k]]
+		}		
+	}
+	diag(res3) <- ncol(A$res1)
+	return(list(J.est=A$res1[,Kmax],t.est=res3))
+	} 
+
 colibriR_c <- function(signalBruite, Kmax, mini=min(signalBruite), maxi=max(signalBruite)){
 	n <- length(signalBruite)
     A <- .C("colibriR_c", signal=as.double(signalBruite), n=as.integer(n), Kmax=as.integer(Kmax),   min=as.double(mini), max=as.double(maxi), path=integer(Kmax*n), cost=double(Kmax)

@@ -35,3 +35,4 @@ setMethod(f = "multisegmixt",signature = "CGHdata",
             invisible(list(mu=mu,loglik = multiloglik[length(multiloglik)],nbiter=0))              
           }
           )
+

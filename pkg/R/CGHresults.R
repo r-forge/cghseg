@@ -139,6 +139,7 @@ setMethod(f = "getbp",signature = "CGHresults",
             }
             
             bp = lapply(names(.Object@mu),FUN = function(ell){
+              cat(ell,"\n")
               bpi = tabulate(.Object@mu[[ell]]$end)
               if (!is.null(.Object@probeID)){
                 out = data.frame(probeID = .Object@probeID,position = x,bp=bpi)

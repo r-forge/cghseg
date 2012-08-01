@@ -14,7 +14,7 @@ setClass("CGHoptions",
                    GCnorm    = "none",
                    nblevels  = 3,
                    alpha     = 0.2,
-                   beta      = 1,
+                   beta      = 0.5,
                    itermax   = Inf)
          )
 
