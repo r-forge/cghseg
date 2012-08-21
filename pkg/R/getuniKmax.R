@@ -10,13 +10,26 @@ setMethod(f = "getuniKmax",signature = "CGHdata",
               select.tmp    = CGHo["select"]
               calling.tmp   = CGHo["calling"]
               calling(CGHo) = FALSE
-              select(CGHo)  = "mBIC"
-              uniKmax = lapply(.Object@Y,FUN = function(y){
-                Kmax = floor(sum(!is.na(y)))*CGHo["alpha"]
-                Kmax = min(200,Kmax)
-                dim(unisegmean(y,CGHo,Kmax)$mu)[1]
-              })
-              Kmax    = max(unlist(uniKmax))
+			  select(CGHo)  = "mBIC"
+			  if (is_parallel_mode()){					
+				  cl <- makeCluster(getOption("cl.cores", 4))
+				  clusterExport(cl, ".OPTIMIZATION") 
+				  clusterExport(cl, "is_optimization_mode") 
+				  uniKmax = parLapply(cl, .Object@Y, fun = function(y){
+							  Kmax = floor(sum(!is.na(y)))*CGHo["alpha"]
+							  Kmax = min(200,Kmax)
+							  dim(unisegmean(y,CGHo,Kmax)$mu)[1]
+						  	}) # fun argument instead of fun
+				  stopCluster(cl)
+			  }
+			  else{
+				  uniKmax = lapply(.Object@Y,FUN = function(y){
+							  Kmax = floor(sum(!is.na(y)))*CGHo["alpha"]
+							  Kmax = min(200,Kmax)
+							  dim(unisegmean(y,CGHo,Kmax)$mu)[1]
+						  })
+			  }
+			  Kmax    = max(unlist(uniKmax))
               uniKmax = lapply(uniKmax,FUN=function(x){x=2*Kmax})
               names(uniKmax) = names(.Object@Y)
               select(CGHo)   = select.tmp

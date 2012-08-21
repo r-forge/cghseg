@@ -1,4 +1,19 @@
+#install.packages("/home/vmiele/Work/Developpement/cghseg/cghseg_0.0.1.tar.gz")
+#unloadNamespace("cghseg")
 library(cghseg)
+
+is_parallel_mode <- function()
+{
+	exists(".PARALLEL", envir = globalenv()) && 
+			get(".PARALLEL", envir = globalenv())
+}
+set_parallel_mode <- function(on = FALSE)
+{
+	old_value <- is_parallel_mode()
+	.PARALLEL <<- on
+	invisible(old_value)
+}
+set_parallel_mode(FALSE)
 
 ## M : nombre d'individus
 ## n : nombre de positions

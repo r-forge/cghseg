@@ -8,7 +8,22 @@ setMethod(f = "multisegmean",signature = "CGHdata",
             Kseq         = c(M:multiKmax)
 
 ######   Individual segmentations for patients   
-            
+
+			if (is_parallel_mode()){					
+				cl <- makeCluster(getOption("cl.cores", 4))
+				clusterExport(cl, ".OPTIMIZATION") 
+				clusterExport(cl, "is_optimization_mode")
+				Res = parLapply(cl, names(.Object@Y), fun = function(m){
+							n                           = length(which(!is.na(.Object@Y[[m]])))
+							Kmax                        = uniKmax[[m]]
+							out                         = unisegmean(.Object@Y[[m]],CGHo,Kmax)
+							J.est                       = n*exp(-((2/n)*out$loglik+log(2*pi)+1))
+							invisible(list(t.est = out$t.est, loglik = out$loglik,J.est=J.est))
+						}) 
+				names(Res) = names(.Object@Y)
+				stopCluster(cl)
+			}
+			else{
             Res = lapply(names(.Object@Y), FUN = function(m){
               n                           = length(which(!is.na(.Object@Y[[m]])))
               Kmax                        = uniKmax[[m]]
@@ -17,7 +32,7 @@ setMethod(f = "multisegmean",signature = "CGHdata",
               invisible(list(t.est = out$t.est, loglik = out$loglik,J.est=J.est))
             }) 
             names(Res) = names(.Object@Y)
-
+			}
 ######   Segment Repartition segments across patients 
             
             J.est              = lapply(Res,FUN = function(x){x$J.est})
@@ -34,17 +49,29 @@ setMethod(f = "multisegmean",signature = "CGHdata",
             if (select.tmp=="none"){
               multiKselect = multiKmax
               dimll        = length(multiloglik)
-            } else if (select.tmp=="mBIC"){    
-              mBIC = sapply(Kseq,FUN=function(K){
-                mu      = multisegout(.Object,seg.rep,Res,K)
-                getmBIC(K,multiloglik[K-M+1],mu,CGHo)     
-              })
+            } else if (select.tmp=="mBIC"){
+				if (is_parallel_mode()){					
+					cl <- makeCluster(getOption("cl.cores", 4))
+					clusterExport(cl, ".OPTIMIZATION") 
+					clusterExport(cl, "is_optimization_mode") 
+					mBIC = parSapply(cl, Kseq, FUN=function(K){
+						mu      = multisegout(.Object,seg.rep,Res,K)
+						getmBIC(K,multiloglik[K-M+1],mu,CGHo)     
+						})
+					stopCluster(cl)
+				}
+				else{
+					mBIC = sapply(Kseq,FUN=function(K){
+                		mu      = multisegout(.Object,seg.rep,Res,K)
+                		getmBIC(K,multiloglik[K-M+1],mu,CGHo)     
+              			})
+				}  			
               multiKselect = Kseq[which.max(mBIC)]
               dimll        = multiKselect
             }
                         
 ######   Outputs   
-            
+
             mu           = multisegout(.Object,seg.rep,Res,multiKselect)
             select(CGHo) = select.tmp
             invisible(list(mu=mu,loglik=multiloglik[dimll],nbiter=0))

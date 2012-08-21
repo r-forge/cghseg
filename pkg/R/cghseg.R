@@ -34,6 +34,12 @@ colibriR_c <- function(signalBruite, Kmax, mini=min(signalBruite), maxi=max(sign
     return(A);	
 } 
 
+meanRuptR_c <- function(Ym, rupt, k){
+	A <- .C("meanRuptR_c", data=as.double(Ym), position=as.integer(rupt), k=as.integer(k), res=double(k), PACKAGE="cghseg")	
+	return(A$res)
+}
+
+
 retour <- function(path, i){
    chaine <- integer(i)
    chaine[i] <- ncol(path)

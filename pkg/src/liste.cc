@@ -19,45 +19,7 @@
 
 #include "liste.h"
 
-
-Liste::Liste()
-{
-  this->max=0.0;
-  this->min=0.0;
-  this->next=NULL;
-}
-
-Liste::Liste(double max_, double min_)
-{
-  this->max=max_;
-  this->min=min_;
-  this->next=NULL;
-}
-
-Liste::Liste(double max_, double min_, Polynome2 *poly_)
-{
-
-  this->max=max_;
-  this->min=min_;
-  this->next=NULL;
-  this->poly= poly_;
-
-}
-
-Liste::Liste( Polynome2 *poly_)
-{
-
-  this->max=0.0;
-  this->min=0.0;
-  this->next=NULL;
-  this->poly= poly_;
-
-}
-Liste::~Liste()
-{
-	 delete next;
-	 delete poly;
-}
+#ifndef INLINED
 /* Setter and Getter */
 /* */  
 double Liste::getMax()
@@ -98,7 +60,6 @@ void Liste::setNext(Liste * next_)
 	this->next = next_;
 }
 
-
 /* Usefull */
 
 void Liste::setToNull()
@@ -110,9 +71,11 @@ void Liste::setToNull()
 }
 void Liste::insert(Liste * maillon_)
 {
+	//std::cerr<<"insert"<<std::endl;
 	maillon_->setNext(this->getNext());
 	this->setNext(maillon_);
 }
+
 
 int Liste::compte(){
 	Liste *l;
@@ -132,6 +95,7 @@ Liste * Liste::removeDoublon()
 	{
 		if(next->getPolynome() == this->getPolynome())
 		{
+		  //std::cerr<<"erase"<<std::endl;
 			this->setMin(next->getMin());
 			this->setNext(next->getNext());
 			next->setToNull();
@@ -156,25 +120,6 @@ void Liste::checkForDoublon()
 		l=l->removeDoublon();
 	}
 }
-/* Show and others */  
-void Liste::show()
-{
-	std::cout << "Max : " << this->getMax() << ", Min : " << this->getMin()<< std::endl;
-	this->poly->show();
-}
-
-void Liste::showAllNext()
-{
-	Liste *l;
-	l = this;
-	while(l != NULL)
-	{
-		l->show();
-		l=l->getNext();	
-	}
-	
-}
-
 void Liste::computeRoots(double a0_)
 {
 	Liste *l;
@@ -209,6 +154,25 @@ void Liste::computeMinOrMax(double * min, int * which)
 		l->getPolynome()->minOrMax(min, &tmp, which);
 		l=l->getNext();	
 	}
+}
+
+#endif
+void Liste::show()
+{
+        std::cout << "Max : " << this->getMax() << ", Min : " << this->getMin()<< std::endl;
+        this->poly->show();
+}
+
+void Liste::showAllNext()
+{
+        Liste *l;
+        l = this;
+        while(l != NULL)
+        {
+                l->show();
+                l=l->getNext();
+        }
+
 }
 
 void Liste::resetMaillonBorders(Polynome2 *poly_)

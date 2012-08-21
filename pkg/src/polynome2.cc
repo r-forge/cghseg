@@ -18,34 +18,7 @@
 */
 
 #include "polynome2.h"
-
-/* Class Definition */
-
-/* Constructors and so on */
-Polynome2::~Polynome2()
-{
-}
-
-Polynome2::Polynome2()
-{
-	a2=0;
-	a1=0;
-	a0=0;
-	rac1=NULL;//*A
-	rac2=NULL;//*A
-	status=0;
-}
-Polynome2::Polynome2(double A2, double A1, double A0, int origine_)
-{
-    a2= A2;
-    a1= A1;
-    a0= A0;
-    rac1=NULL;//*A
-    rac2=NULL;//*A
-    status=0;
-    origine= origine_;
-}
-
+#ifndef INLINED
 /* reset */
 void Polynome2::reset(double A2, double A1, double A0, int origine_)
 {
@@ -210,4 +183,4 @@ void Polynome2::show()
    std::cout << "Rc1 : " << this->getRacine1() << " , Rc2 : " << this->getRacine2() << ", St : " << this->getStatus() << ", Or : " << this->getOrigine() << std::endl;
    std::cout << "-----------------------" <<std::endl;
 }
-
+#endif
