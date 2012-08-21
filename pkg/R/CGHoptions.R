@@ -7,6 +7,7 @@ setClass("CGHoptions",
            nblevels  = 'numeric',
            alpha     = 'numeric',
            beta      = 'numeric',
+           nbprocs   = 'numeric',
            itermax   = 'numeric'),
          prototype(select    = "mBIC",
                    calling   = FALSE,
@@ -15,6 +16,7 @@ setClass("CGHoptions",
                    nblevels  = 3,
                    alpha     = 0.2,
                    beta      = 0.5,
+                   nbprocs   = 1,
                    itermax   = Inf)
          )
 
@@ -29,6 +31,7 @@ setMethod(
             if (i=="nblevels")   {return(x@nblevels)}    else {}
             if (i=="alpha")      {return(x@alpha)}       else {}
             if (i=="beta")       {return(x@beta)}        else {}
+            if (i=="nbprocs")    {return(x@nbprocs)}     else {}
             if (i=="itermax")    {return(x@itermax)}     else {}
           }          
           )
@@ -38,7 +41,7 @@ setMethod(
           signature = "CGHoptions",
           definition = function(x){
             cat("****** CGHoption print ******\n")
-            A = data.frame(options = rep(NA,8), value = rep(NA,8),row.names=NULL)
+            A = data.frame(options = rep(NA,9), value = rep(NA,9),row.names=NULL)
             A[1,1]  = "select"
             A[1,2]  = x@select
             A[2,1]  = "calling"
@@ -53,8 +56,10 @@ setMethod(
             A[6,2]  = x@alpha
             A[7,1]  = "beta"
             A[7,2]  = x@beta
-            A[8,1]  = "itermax"
-            A[8,2]  = x@itermax
+            A[8,1]  = "nbprocs"
+            A[8,2]  = x@nbprocs            
+            A[9,1]  = "itermax"
+            A[9,2]  = x@itermax
             print(A)            
           }          
           )
@@ -64,7 +69,7 @@ setMethod(
           signature = "CGHoptions",
           definition = function(object){
             cat("****** CGHoption show ******\n")
-            A = data.frame(options = rep(NA,8), value = rep(NA,8))
+            A = data.frame(options = rep(NA,9), value = rep(NA,9))
             A[1,1]  = "select"
             A[1,2]  = object@select
             A[2,1]  = "calling"
@@ -79,8 +84,10 @@ setMethod(
             A[6,2]  = object@alpha
             A[7,1]  = "beta"
             A[7,2]  = object@beta
-            A[8,1]  = "itermax"
-            A[8,2]  = object@itermax
+            A[8,1]  = "nbprocs"
+            A[8,2]  = object@nbprocs
+            A[9,1]  = "itermax"
+            A[9,2]  = object@itermax
             print(A)            
           }          
           )
@@ -146,6 +153,15 @@ setReplaceMethod(
                  signature="CGHoptions",
                  definition=function(object,value){
                    object@beta =value
+                   return (object)
+                 }
+                 )
+setGeneric("nbprocs<-",function(object,value){standardGeneric("nbprocs<-")})
+setReplaceMethod(
+                 f="nbprocs",
+                 signature="CGHoptions",
+                 definition=function(object,value){
+                   object@nbprocs =value
                    return (object)
                  }
                  )

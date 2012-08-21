@@ -12,7 +12,7 @@ setMethod(f = "getuniKmax",signature = "CGHdata",
               calling(CGHo) = FALSE
 			  select(CGHo)  = "mBIC"
 			  if (is_parallel_mode()){					
-				  cl <- makeCluster(getOption("cl.cores", 4))
+				  cl <- makeCluster(getOption("cl.cores", CGHo@nbprocs))
 				  clusterExport(cl, ".OPTIMIZATION") 
 				  clusterExport(cl, "is_optimization_mode") 
 				  uniKmax = parLapply(cl, .Object@Y, fun = function(y){
