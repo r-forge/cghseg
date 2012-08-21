@@ -23,13 +23,12 @@
 #include <float.h>
 #include <stdlib.h>
 
-#define INLINED
 class Polynome2 {
  private:
      double a2, a1, a0;
-/* racine du polynome - A*/
+     /* racine du polynome - A*/
      double rac1, rac2;
-/* status of the polynome 0 = roots not computed, 1 = computed*/
+     /* status of the polynome 0 = roots not computed, 1 = computed*/
      int status;
      int origine;
  public:
@@ -41,105 +40,56 @@ class Polynome2 {
      : a0(A0),a1(A1),a2(A2),rac1(0.),rac2(0.),status(0),origine(origine_) {}
      /* a few operations */
 	/* reset */
-#ifdef INLINED
      inline
-#endif
      void reset(double A2, double A1, double A0, int origine_);
-
      /* getter and setter */
-#ifdef INLINED
      inline
-#endif
      double geta2();
-#ifdef INLINED
      inline
-#endif
      double geta1();
-#ifdef INLINED
      inline
-#endif
      double geta0();
-#ifdef INLINED
      inline
-#endif
      double getRacine1();
-#ifdef INLINED
      inline
-#endif
      double getRacine2();
-
-#ifdef INLINED
      inline
-#endif
      void seta2(double);
-#ifdef INLINED
      inline
-#endif
      void seta1(double);
-#ifdef INLINED
      inline
-#endif
      void seta0(double);
-#ifdef INLINED
      inline
-#endif
      void setRacine1(double);
-#ifdef INLINED
      inline
-#endif
      void setRacine2(double);
-#ifdef INLINED
      inline
-#endif
      void setStatus(int);
-#ifdef INLINED
      inline
-#endif
      int getStatus();
-#ifdef INLINED
      inline
-#endif
      int getOrigine();
-
      /* Delta and others */
-#ifdef INLINED
      inline
-#endif
      double eval(double);
-#ifdef INLINED
      inline
-#endif
      double delta();
-	 /* Delta  of the Polynome - double */
-#ifdef INLINED
+     /* Delta  of the Polynome - double */
      inline
-#endif
      double delta(double);
-
-#ifdef INLINED
      inline
-#endif
      void roots();
-	  /* Roots  of the Polynome - double */
-#ifdef INLINED
+     /* Roots  of the Polynome - double */
      inline
-#endif
      void roots(double);
-#ifdef INLINED
      inline
-#endif
-	 void add(double, double, double);
-#ifdef INLINED
+     void add(double, double, double);
      inline
-#endif
      void minOrMax(double *, double *, int *);
      /* print and others */
-#ifdef INLINED
      inline
-#endif
      void show();
 };
-#ifdef INLINED
 /* reset */
 void Polynome2::reset(double A2, double A1, double A0, int origine_)
 {
@@ -207,7 +157,6 @@ void Polynome2::setStatus(int status_)
 {
 	status=status_;
 }
-
 /* Delta and Others */
 double Polynome2::eval(double X)
 {
@@ -260,7 +209,6 @@ void Polynome2::roots()
 		this->setStatus(1);
 	}
 }
-
 void Polynome2::roots(double a0_)
 {
 	if(this->getStatus() != 1)
@@ -285,7 +233,6 @@ void Polynome2::roots(double a0_)
 		this->setStatus(1);
 	}
 }
-
 void Polynome2::add(double a2_, double a1_, double a0_)
 {
 	if( this->getStatus() != 2)
@@ -304,5 +251,4 @@ void Polynome2::show()
    std::cout << "Rc1 : " << this->getRacine1() << " , Rc2 : " << this->getRacine2() << ", St : " << this->getStatus() << ", Or : " << this->getOrigine() << std::endl;
    std::cout << "-----------------------" <<std::endl;
 }
-#endif //INLINED
 #endif //POLYNOME2H

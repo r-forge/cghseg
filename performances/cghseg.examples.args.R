@@ -5,7 +5,7 @@
 
 args <- commandArgs(trailingOnly = TRUE)
 profMode = as.logical(args[1])
-parMode = as.logical(args[2])
+nbp = as.integer(args[2])
 typeMode = args[3]
 iM = as.integer(args[4])
 iN = as.integer(args[5])
@@ -24,35 +24,35 @@ optimMode = as.logical(args[7])
 library(cghseg)
 
 ## OPTIMIZATION environment selection
-is_optimization_mode <- function()
-{
-	exists(".OPTIMIZATION", envir = globalenv()) && 
-			get(".OPTIMIZATION", envir = globalenv())
-}
-set_optimization_mode <- function(on = FALSE)
-{
-	old_value <- is_optimization_mode()
-	.OPTIMIZATION <<- on
-	invisible(old_value)
-}
-set_optimization_mode(optimMode)
+#is_optimization_mode <- function()
+#{
+#	exists(".OPTIMIZATION", envir = globalenv()) && 
+#			get(".OPTIMIZATION", envir = globalenv())
+#}
+#set_optimization_mode <- function(on = FALSE)
+#{
+#	old_value <- is_optimization_mode()
+#	.OPTIMIZATION <<- on
+#	invisible(old_value)
+#}
+#set_optimization_mode(optimMode)
 
 ## Parallel environment selection
-is_parallel_mode <- function()
-{
-	exists(".PARALLEL", envir = globalenv()) && 
-			get(".PARALLEL", envir = globalenv())
-}
-set_parallel_mode <- function(on = FALSE)
-{
-	old_value <- is_parallel_mode()
-	.PARALLEL <<- on
-	invisible(old_value)
-}
-set_parallel_mode(parMode)
-if (is_parallel_mode()){
-	library(parallel)
-}
+#is_parallel_mode <- function()
+#{
+#	exists(".PARALLEL", envir = globalenv()) && 
+#			get(".PARALLEL", envir = globalenv())
+#}
+#set_parallel_mode <- function(on = FALSE)
+#{
+#	old_value <- is_parallel_mode()
+#	.PARALLEL <<- on
+#	invisible(old_value)
+#}
+#set_parallel_mode(parMode)
+#if (is_parallel_mode()){
+#	library(parallel)
+#}
 
 ##############################################################################
 ## M : nombre d'individus
@@ -85,6 +85,9 @@ if (typeMode == "load"){
 
 CGHd         = new("CGHdata",Y=simul$Y)
 CGHo         = new("CGHoptions")
+
+# Multicore
+nbprocs(CGHo) = nbp
 
 ## pour d�terminer combien de segments au max par profil
 ## plus Kmax augmente pour chaque profil plus ca coute cher (l'algo est de complexit� (Kmax x n) pour chaque profil)

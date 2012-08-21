@@ -13,16 +13,10 @@ unisegmean <- function(Y,CGHo,Kmax){
     mBIC = sapply(1:Kmax,FUN=function(K){
       th      = out$t.est[K,1:K]
       rupt    = matrix(ncol=2,c(c(1,th[1:K-1]+1),th))
-	  if (is_optimization_mode()){
-	  	resmean = meanRuptR_c(Y, rupt[,2], K)
-	  }
-	  else{
-		resmean = apply(rupt,1,FUN=function(z) mean(Y[z[1]:z[2]], na.rm=T))
-	  }
+	  resmean = meanRuptR_c(Y, rupt[,2], K)
       mu      = data.frame(begin = rupt[,1],
         end   = rupt[,2],
-        mean  = resmean) 
-		#mean = apply(rupt,1,FUN=function(z) mean(Y[z[1]:z[2]], na.rm=T)))    
+        mean  = resmean)    
       mu      = list(aux=mu)  
       getmBIC(K,loglik[K],mu,CGHo)   
 	})
@@ -32,16 +26,10 @@ unisegmean <- function(Y,CGHo,Kmax){
   t.est   = bpwmissing(out$t.est,present.data,n.com)
   th      = t.est[Kselect,1:Kselect]
   rupt    = matrix(ncol=2,c(c(1,th[1:Kselect-1]+1),th)) 
-  if (is_optimization_mode()){
-  	resmean = meanRuptR_c(Y, rupt[,2], Kselect)
-  }
-  else{
-	  resmean = apply(rupt,1,FUN=function(z) mean(Y[z[1]:z[2]], na.rm=T))
-  }
+  resmean = meanRuptR_c(Y, rupt[,2], Kselect)
   mu      = data.frame(begin = rupt[,1],
     end   = rupt[,2],
-    mean  = resmean) 
-	#mean = apply(rupt,1,FUN=function(z) mean(Y[z[1]:z[2]], na.rm=T)))    
+    mean  = resmean)     
   invisible(list(mu=mu,loglik=loglik,t.est=t.est))
   
 }

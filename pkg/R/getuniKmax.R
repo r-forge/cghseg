@@ -11,10 +11,8 @@ setMethod(f = "getuniKmax",signature = "CGHdata",
               calling.tmp   = CGHo["calling"]
               calling(CGHo) = FALSE
 			  select(CGHo)  = "mBIC"
-			  if (is_parallel_mode()){					
-				  cl <- makeCluster(getOption("cl.cores", CGHo@nbprocs))
-				  clusterExport(cl, ".OPTIMIZATION") 
-				  clusterExport(cl, "is_optimization_mode") 
+			  if (CGHo@nbprocs>1){					
+				  cl <- makeCluster(getOption("cl.cores", CGHo@nbprocs)) 
 				  uniKmax = parLapply(cl, .Object@Y, fun = function(y){
 							  Kmax = floor(sum(!is.na(y)))*CGHo["alpha"]
 							  Kmax = min(200,Kmax)

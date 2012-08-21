@@ -9,10 +9,8 @@ setMethod(f = "multisegmean",signature = "CGHdata",
 
 ######   Individual segmentations for patients   
 
-			if (is_parallel_mode()){					
+			if (CGHo@nbprocs>1){					
 				cl <- makeCluster(getOption("cl.cores", CGHo@nbprocs))
-				clusterExport(cl, ".OPTIMIZATION") 
-				clusterExport(cl, "is_optimization_mode")
 				Res = parLapply(cl, names(.Object@Y), fun = function(m){
 							n                           = length(which(!is.na(.Object@Y[[m]])))
 							Kmax                        = uniKmax[[m]]
@@ -50,10 +48,8 @@ setMethod(f = "multisegmean",signature = "CGHdata",
               multiKselect = multiKmax
               dimll        = length(multiloglik)
             } else if (select.tmp=="mBIC"){
-				if (is_parallel_mode()){					
-					cl <- makeCluster(getOption("cl.cores", CGHo@nbprocs))
-					clusterExport(cl, ".OPTIMIZATION") 
-					clusterExport(cl, "is_optimization_mode") 
+				if (CGHo@nbprocs>1){					
+					cl <- makeCluster(getOption("cl.cores", CGHo@nbprocs)) 
 					mBIC = parSapply(cl, Kseq, FUN=function(K){
 						mu      = multisegout(.Object,seg.rep,Res,K)
 						getmBIC(K,multiloglik[K-M+1],mu,CGHo)     
