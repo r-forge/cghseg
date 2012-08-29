@@ -1,12 +1,12 @@
 unisegmixt <- function(Y,CGHo,Kmax,phi){
-  
+  #ptm = proc.time()
   P            = CGHo["nblevels"]
   n.com        = length(Y)
   present.data = which(!is.na(Y))
   missing.data = which(is.na(Y))
   x            = Y[present.data]
   out          = ClassiSeg(x,phi[1:P],Kmax)
-
+	
   loglik = sapply(1:Kmax,FUN=function(k){
     th        = out$t.est[k,1:k]
     rupt      = matrix(ncol=2,c(c(1,th[1:k-1]+1),th))    
@@ -20,7 +20,9 @@ unisegmixt <- function(Y,CGHo,Kmax,phi){
     end   = rupt[,2],
     mean  = rep(NA,Kmax)
     )  
-  
+	
+  #elapsed = proc.time() - ptm
+  #cat(elapsed," by ",Sys.getpid(),"\n")
   invisible(list(mu=mu,loglik=loglik,t.est=t.est))
   
 }

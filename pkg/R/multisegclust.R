@@ -1,6 +1,6 @@
 setMethod(f = "multisegclust",signature = "CGHdata",
-          definition = function(.Object,CGHo,uniKmax,multiKmax){
-
+          definition = function(.Object,CGHo,uniKmax,multiKmax){			  
+			  
             P            = CGHo["nblevels"]
             tol          = 1e-2
             select.tmp   = CGHo["select"]
@@ -9,26 +9,51 @@ setMethod(f = "multisegclust",signature = "CGHdata",
             nbdata       = lapply(.Object@Y,FUN = function(y){length(y[!is.na(y)])}) 
             nbdata       = sum(unlist(nbdata))    
             iter         = 0
-            eps          = Inf
-            
-            mu        = multisegmean(.Object,CGHo,uniKmax,multiKmax)$mu
+            eps          = Inf		
+			
+			if (CGHo@nbprocs>1){				
+				# Initial data sends, will be reused but not resend
+				# Data are emulated to belong to .GlobalEnv
+				# since worker function will also belong to .GlobalEnv
+				cl <- makeCluster(getOption("cl.cores", CGHo@nbprocs))
+				assign("Y.ref", .Object@Y, envir = .GlobalEnv)
+				clusterExport(cl, "Y.ref")
+				assign("uniKmax.ref", uniKmax, envir = .GlobalEnv)
+				clusterExport(cl, "uniKmax.ref")
+				assign("CGHo.ref", CGHo, envir = .GlobalEnv)
+				clusterExport(cl, "CGHo.ref")
+			}
+		
+			mu        = multisegmean(.Object,CGHo,uniKmax,multiKmax,cl)$mu
             out.DP2EM = DP2EM(.Object,mu)
             phi       = EMinit(out.DP2EM$signal,out.DP2EM$rupt,P,vh=TRUE)
             out.EM    = EMalgo(out.DP2EM$signal, phi, out.DP2EM$rupt, P, vh = TRUE)
+			cat("mu: ",object.size(mu),"\n")
+			cat("out.DP2EM: ",object.size(out.DP2EM),"\n")
+			cat("phi: ",phi,"\n")
+			cat("out.EM: ",object.size(out.EM),"\n")
+			rm(out.DP2EM)
             n.com     = length(.Object@Y[[1]])
             mu.test   = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau)
+			cat("mu.test: ",object.size(mu.test),"\n")
             nk        = unlist(lapply(mu.test,function(x){x$end-x$begin+1}))
             muk       = unlist(lapply(mu.test,function(x){x$mean}))
             param     = list(tm1 = rep(muk,nk),
                                t = rep(muk,nk),
-                             tp1 = rep(muk,nk))
-
+                             tp1 = rep(muk,nk))					 
+			cat("param: ",object.size(param),"\n")
 
             ## second iteration to initialize the epsilon algorithm
             ## initialize param$t
-            mu                  = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi)$mu
+			z <- sapply(ls(), function(x) object.size(get(x)))
+			print(z)
+            mu                  = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi,cl)$mu
             out.DP2EM           = DP2EM(.Object,mu)
             out.EM              = EMalgo(out.DP2EM$signal, out.EM$phi, out.DP2EM$rupt, P, vh = TRUE)
+			cat("mu: ",object.size(mu),"\n")
+			cat("out.DP2EM: ",object.size(out.DP2EM),"\n")
+			cat("out.EM: ",object.size(out.EM),"\n")
+			rm(out.DP2EM)
             mu.test             = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau) 
             pred                = lapply(names(.Object@Y),FUN = function(m){
               nk  = mu.test[[m]]$end-mu.test[[m]]$begin+1
@@ -38,14 +63,18 @@ setMethod(f = "multisegclust",signature = "CGHdata",
             names(pred)   = names(.Object@Y)
             pred          = unlist(pred,use.names=TRUE)
             param$t       = pred
+			cat("pred: ",object.size(pred),"\n")
+			rm(pred)
             param.dot.tm2 = param$t
 
-            while ( (eps > tol) & (iter < CGHo@itermax) ){    
-
-              iter      = iter+1              
-              mu        = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi)$mu
+            while ( (eps > tol) & (iter < CGHo@itermax) ){   
+              iter      = iter+1  
+			  z <- sapply(ls(), function(x) object.size(get(x))) 
+			  print(z)           
+              mu        = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi,cl)$mu
               out.DP2EM = DP2EM(.Object,mu)
               out.EM    = EMalgo(out.DP2EM$signal,out.EM$phi, out.DP2EM$rupt, P, vh = TRUE)
+			  rm(out.DP2EM)
               mu.test   = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau) 
               pred      = lapply(names(.Object@Y),FUN = function(m){
                 nk  = mu.test[[m]]$end-mu.test[[m]]$begin+1
@@ -54,7 +83,8 @@ setMethod(f = "multisegclust",signature = "CGHdata",
               })
               names(pred) = names(.Object@Y)
               pred        = unlist(pred,use.names=TRUE)
-              param$tp1   = pred           
+              param$tp1   = pred  
+			  rm(pred)         
 
               param.dot.tm1 = param$t + invnorm( invnorm(param$tm1-param$t) + invnorm(param$tp1-param$t) )            
               param$tm1     = param$t
@@ -65,6 +95,9 @@ setMethod(f = "multisegclust",signature = "CGHdata",
 
               
             } # end while
+			if (CGHo@nbprocs>1){
+				stopCluster(cl)
+			}
             
 ######   output   #####################################################################
             

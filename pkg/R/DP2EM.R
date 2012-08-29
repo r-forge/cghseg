@@ -1,6 +1,6 @@
 setMethod(f = "DP2EM",signature = "CGHdata",
           definition = function(.Object,mu){
-            
+			cat("DP2EM\n")  
             # warning : missing values are replaced by the mean for the position in each group
             n.com = length(.Object@Y[[1]])
             M     = length(names(.Object@Y))  
@@ -23,6 +23,7 @@ setMethod(f = "DP2EM",signature = "CGHdata",
             begin = unlist(begin)
             
             rupt = cbind(begin+phase,end+phase)
+			cat("DP2EM finished\n")  
             invisible(list(rupt=rupt,signal=signal))
           }
           )

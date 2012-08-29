@@ -10,4 +10,4 @@ exportMethods("select<-","calling<-","wavenorm<-","GCnorm<-","nblevels<-","alpha
 exportMethods("getuniKmax","getmultiKmax")
 exportMethods("getbp","getsegprofiles","getlevels","getbgoutliers")
 exportMethods("multiseg","uniseg")
-export("simulprofiles")
+export("simulprofiles","unisegmixt","unisegmean")

@@ -37,3 +37,14 @@ CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)
 ## toutes les fonctions multi... utilisent du uni... qu'on pourrait paralleliser
 ## l'algo de recherche du minimum du BIC par l'algo des cordes : golden.search.R
 
+## others
+calling(CGHo)  = T
+CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)
+
+calling(CGHo)  = F
+wavenorm(CGHo) = "spline"
+CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)
+
+calling(CGHo)  = T
+wavenorm(CGHo) = "spline"
+CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)

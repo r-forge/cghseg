@@ -1,5 +1,5 @@
 setMethod(f = "multisegmean",signature = "CGHdata",
-          definition = function(.Object,CGHo,uniKmax,multiKmax){
+          definition = function(.Object,CGHo,uniKmax,multiKmax,cl){
            
             select.tmp   = CGHo["select"]
             select(CGHo) = "none"
@@ -7,19 +7,30 @@ setMethod(f = "multisegmean",signature = "CGHdata",
             M            = length(names(.Object@Y))
             Kseq         = c(M:multiKmax)
 
-######   Individual segmentations for patients   
-
+######   Individual segmentations for patients 
+			cat("multisegmean //\n")  
 			if (CGHo@nbprocs>1){					
-				cl <- makeCluster(getOption("cl.cores", CGHo@nbprocs))
-				Res = parLapply(cl, names(.Object@Y), fun = function(m){
-							n                           = length(which(!is.na(.Object@Y[[m]])))
-							Kmax                        = uniKmax[[m]]
-							out                         = unisegmean(.Object@Y[[m]],CGHo,Kmax)
-							J.est                       = n*exp(-((2/n)*out$loglik+log(2*pi)+1))
-							invisible(list(t.est = out$t.est, loglik = out$loglik,J.est=J.est))
-						}) 
+				#cl <- makeCluster(getOption("cl.cores", CGHo@nbprocs))
+				unisegmean.proxy <- function(m){
+						n                           = length(which(!is.na(Y.ref[[m]])))
+						Kmax                        = uniKmax.ref[[m]]
+						out                         = unisegmean(Y.ref[[m]],CGHo.ref,Kmax)
+						J.est                       = n*exp(-((2/n)*out$loglik+log(2*pi)+1))
+						invisible(list(t.est = out$t.est, loglik = out$loglik,J.est=J.est))
+					}
+				environment(unisegmean.proxy) <- .GlobalEnv
+				clusterExport(cl, "unisegmean")	# to be know in unisegmixt.proxy
+				Res = parLapply(cl, names(.Object@Y), fun = unisegmean.proxy) 
+				
+#				# Following version required the copy of all data:
+#				Res = parLapply(cl, names(.Object@Y), fun = function(m){
+#							n                           = length(which(!is.na(.Object@Y[[m]])))
+#							Kmax                        = uniKmax[[m]]
+#							out                         = unisegmean(.Object@Y[[m]],CGHo,Kmax)
+#							J.est                       = n*exp(-((2/n)*out$loglik+log(2*pi)+1))
+#							invisible(list(t.est = out$t.est, loglik = out$loglik,J.est=J.est))
+#						}) 
 				names(Res) = names(.Object@Y)
-				stopCluster(cl)
 			}
 			else{
             Res = lapply(names(.Object@Y), FUN = function(m){
@@ -32,6 +43,7 @@ setMethod(f = "multisegmean",signature = "CGHdata",
             names(Res) = names(.Object@Y)
 			}
 ######   Segment Repartition segments across patients 
+			cat("multisegmean finishing\n")  
             
             J.est              = lapply(Res,FUN = function(x){x$J.est})
             nbdata             = lapply(.Object@Y,FUN = function(y){length(y[!is.na(y)])}) 
@@ -43,18 +55,18 @@ setMethod(f = "multisegmean",signature = "CGHdata",
 
 
 ######   Model Selection  
-                        
+
+			cat("multisegmean // 2 \n")  
             if (select.tmp=="none"){
               multiKselect = multiKmax
               dimll        = length(multiloglik)
             } else if (select.tmp=="mBIC"){
 				if (CGHo@nbprocs>1){					
-					cl <- makeCluster(getOption("cl.cores", CGHo@nbprocs)) 
 					mBIC = parSapply(cl, Kseq, FUN=function(K){
 						mu      = multisegout(.Object,seg.rep,Res,K)
 						getmBIC(K,multiloglik[K-M+1],mu,CGHo)     
 						})
-					stopCluster(cl)
+					#stopCluster(cl)
 				}
 				else{
 					mBIC = sapply(Kseq,FUN=function(K){
@@ -67,9 +79,11 @@ setMethod(f = "multisegmean",signature = "CGHdata",
             }
                         
 ######   Outputs   
+			cat("multisegmean finishing 2\n")  
 
             mu           = multisegout(.Object,seg.rep,Res,multiKselect)
-            select(CGHo) = select.tmp
+            select(CGHo) = select.tmp			
+			cat("multisegmean finished\n")  
             invisible(list(mu=mu,loglik=multiloglik[dimll],nbiter=0))
           } 
           )

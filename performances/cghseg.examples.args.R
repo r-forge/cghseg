@@ -15,7 +15,7 @@ if (typeMode == "simul"){
 if (typeMode == "load"){
 	compareMode = as.logical(args[6])	
 }
-optimMode = as.logical(args[7])
+#optimMode = as.logical(args[7])
 
 
 ##############################################################################
@@ -106,36 +106,77 @@ multiKmax    = getmultiKmax(CGHd,CGHo,uniKmax)
 ##############################################################################
 ## fonction generale pour la segmentation multivariee
 #ptm = proc.time()
+#if (isTRUE(profMode)){
+#	Rprof("profiling/multiseg.out")
+#}
+#CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)
+#if (isTRUE(profMode)){
+#	Rprof()
+#	summaryRprof("profiling/multiseg.out")
+#}
+##proc.time() - ptm
+#
+#if (typeMode == "simul"){
+#	if (isTRUE(writeMode)){
+#		filename = paste("tests/res_M",iM,"_N",iN,".RData", sep="")
+#		save(CGHr, file=filename)
+#	}
+#}
+#if (typeMode == "load"){
+#	if (isTRUE(compareMode)){
+#		thisCGHr = CGHr
+#		filename = paste("tests/res_M",iM,"_N",iN,".RData", sep="")
+#		load(file=filename)
+#		cat("Integration test ",iN,"_",iM," is ",as.numeric(thisCGHr@loglik)," == ",as.numeric(CGHr@loglik)," = ",as.numeric(thisCGHr@loglik) ==  as.numeric(CGHr@loglik),"\n", sep="")
+#	}
+#}
+
+
 if (isTRUE(profMode)){
-	Rprof("profiling/multiseg.out")
+	Rprof("profiling/multisegv2.out")
 }
+calling(CGHo)  = T
 CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)
 if (isTRUE(profMode)){
 	Rprof()
-	summaryRprof("profiling/multiseg.out")
+	summaryRprof("profiling/multisegv2.out")
 }
-#proc.time() - ptm
 
 if (typeMode == "simul"){
 	if (isTRUE(writeMode)){
-		filename = paste("tests/res_M",iM,"_N",iN,".RData", sep="")
+		filename = paste("tests/res_M",iM,"_N",iN,"v2.RData", sep="")
 		save(CGHr, file=filename)
 	}
 }
 if (typeMode == "load"){
 	if (isTRUE(compareMode)){
 		thisCGHr = CGHr
-		filename = paste("tests/res_M",iM,"_N",iN,".RData", sep="")
+		filename = paste("tests/res_M",iM,"_N",iN,"v2.RData", sep="")
 		load(file=filename)
 		cat("Integration test ",iN,"_",iM," is ",as.numeric(thisCGHr@loglik)," == ",as.numeric(CGHr@loglik)," = ",as.numeric(thisCGHr@loglik) ==  as.numeric(CGHr@loglik),"\n", sep="")
 	}
 }
 
-## options :
-## select(CGHo)   = "none" ou "mBIC" : selection du nombre de segment. Soit pas de selection (donc Kmax segments) ou critere BIC modifi�
-## calling(CGHo)  = T/F : utilisation du mod�le de segmentation/clustering (T) pour r�duire le nombre de niveaux des segments
-## wavenorm(CGHo) = "none","spline","position" : m�thodes de normalisation de l'effet vague (wavenormalization)
+#if (isTRUE(profMode)){
+#	Rprof("profiling/multisegv3.out")
+#}
+#calling(CGHo)  = F
+#wavenorm(CGHo) = "spline"
+#CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)
+#if (isTRUE(profMode)){
+#	Rprof()
+#	summaryRprof("profiling/multisegv3.out")
+#}
+#
+#
+#if (isTRUE(profMode)){
+#	Rprof("profiling/multisegv4.out")
+#}
+#calling(CGHo)  = T
+#wavenorm(CGHo) = "spline"
+#CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)
+#if (isTRUE(profMode)){
+#	Rprof()
+#	summaryRprof("profiling/multisegv4.out")
+#}
 
-
-## toutes les fonctions multi... utilisent du uni... qu'on pourrait paralleliser
-## l'algo de recherche du minimum du BIC par l'algo des cordes : golden.search.R
