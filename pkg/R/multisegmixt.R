@@ -7,14 +7,11 @@ setMethod(f = "multisegmixt",signature = "CGHdata",
             multiKselect = multiKmax
 
 ######   Individual segmentations for patients 
-			cat("multisegmixt //\n")
-			#cat(gc()[2,1],"\n")
-			if (CGHo@nbprocs>1){					
-				#cl <- makeCluster(getOption("cl.cores", CGHo@nbprocs), outfile="multisegmixt.log")				
+			if (CGHo@nbprocs>1){
+				cat("multisegmixt //                         \r")				
 				unisegmixt.proxy <- function(m){
 					n     = length(which(!is.na(Y.ref[[m]])))
 					Kmax  = uniKmax.ref[[m]]
-					#cat(m," for ",Sys.getpid(),"\n")
 					out   = unisegmixt(Y.ref[[m]],CGHo.ref,Kmax,phi.ref)
 					J.est = n*exp(-((2/n)*out$loglik+log(2*pi)+1))
 					invisible(list(t.est = out$t.est, loglik = out$loglik,J.est=J.est))
@@ -24,24 +21,10 @@ setMethod(f = "multisegmixt",signature = "CGHdata",
 				assign("phi.ref", phi, envir = .GlobalEnv)
 				clusterExport(cl, "phi.ref")			
 				Res = parLapply(cl, names(Y.ref), fun = unisegmixt.proxy)
-				
-#				# Following version required the copy of all data:
-#				.Object@Y # force evaluation
-#				uniKmax # idem
-#				CGHo # idem
-#				phi # idem
-#				Res = parLapply(cl, names(.Object@Y), fun = function(m){
-#							n     = length(which(!is.na(.Object@Y[[m]])))
-#							Kmax  = uniKmax[[m]]
-#							#cat(m," for ",Sys.getpid(),"\n")
-#							out   = unisegmixt(.Object@Y[[m]],CGHo,Kmax,phi)
-#							J.est = n*exp(-((2/n)*out$loglik+log(2*pi)+1))
-#							invisible(list(t.est = out$t.est, loglik = out$loglik,J.est=J.est))
-#						})
-				names(Res) = names(.Object@Y)  
-				#stopCluster(cl)
+				names(Res) = names(.Object@Y)
 			}
 			else{	
+				cat("multisegmixt                            \r")	
 				Res = lapply(names(.Object@Y), FUN = function(m){
 							n     = length(which(!is.na(.Object@Y[[m]])))
 							Kmax  = uniKmax[[m]]
@@ -53,7 +36,7 @@ setMethod(f = "multisegmixt",signature = "CGHdata",
 			}
   
 ######   Segment Repartition segments across patients 
-			cat("multisegmixt finishing\n")
+			cat("multisegmixt finishing                  \r")
       
             J.est              = lapply(Res,FUN = function(x){x$J.est})
             nbdata             = lapply(.Object@Y,FUN = function(y){length(y[!is.na(y)])}) 
@@ -68,7 +51,7 @@ setMethod(f = "multisegmixt",signature = "CGHdata",
             multiKselect    = multiKmax  
             mu              = multisegout(.Object,seg.rep,Res,multiKselect)
             select(CGHo)    = select.tmp
-			cat("multisegmixt finished\n")             
+			cat("multisegmixt finished                   \r")             
             invisible(list(mu=mu,loglik = multiloglik[length(multiloglik)],nbiter=0)) 
           }
           )
