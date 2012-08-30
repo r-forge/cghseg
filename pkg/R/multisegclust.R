@@ -26,8 +26,11 @@ setMethod(f = "multisegclust",signature = "CGHdata",
 		
 			mu        = multisegmean(.Object,CGHo,uniKmax,multiKmax,cl)$mu
             out.DP2EM = DP2EM(.Object,mu)
-            phi       = EMinit(out.DP2EM$signal,out.DP2EM$rupt,P,vh=TRUE)
-            out.EM    = EMalgo(out.DP2EM$signal, phi, out.DP2EM$rupt, P, vh = TRUE)
+            ##phi       = EMinit(out.DP2EM$signal,out.DP2EM$rupt,P,vh=TRUE)
+            ##out.EM    = EMalgo(out.DP2EM$signal, phi, out.DP2EM$rupt, P, vh = TRUE)
+            phi       = compactEMinit(out.DP2EM$xk,out.DP2EM$x2k,out.DP2EM$nk,P=2,vh=TRUE)
+            out.EM    = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P=2,vh=TRUE)
+
             n.com     = length(.Object@Y[[1]])
             mu.test   = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau)
             nk        = unlist(lapply(mu.test,function(x){x$end-x$begin+1}))
@@ -40,7 +43,8 @@ setMethod(f = "multisegclust",signature = "CGHdata",
             ## initialize param$t
             mu                  = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi,cl)$mu
             out.DP2EM           = DP2EM(.Object,mu)
-            out.EM              = EMalgo(out.DP2EM$signal, out.EM$phi, out.DP2EM$rupt, P, vh = TRUE)
+            ##out.EM              = EMalgo(out.DP2EM$signal, out.EM$phi, out.DP2EM$rupt, P, vh = TRUE)
+	    out.EM              = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P=2,vh=TRUE)
             mu.test             = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau) 
             pred                = lapply(names(.Object@Y),FUN = function(m){
               nk  = mu.test[[m]]$end-mu.test[[m]]$begin+1
@@ -56,7 +60,8 @@ setMethod(f = "multisegclust",signature = "CGHdata",
               iter      = iter+1 
               mu        = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi,cl)$mu
               out.DP2EM = DP2EM(.Object,mu)
-              out.EM    = EMalgo(out.DP2EM$signal,out.EM$phi, out.DP2EM$rupt, P, vh = TRUE)			  
+              ##out.EM    = EMalgo(out.DP2EM$signal,out.EM$phi, out.DP2EM$rupt, P, vh = TRUE)
+	      out.EM    = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P=2,vh=TRUE)			  
               mu.test   = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau) 
               pred      = lapply(names(.Object@Y),FUN = function(m){
                 nk  = mu.test[[m]]$end-mu.test[[m]]$begin+1

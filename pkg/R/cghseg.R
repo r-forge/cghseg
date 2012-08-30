@@ -39,6 +39,11 @@ meanRuptR_c <- function(Ym, rupt, k){
 	return(A$res)
 }
 
+meansqRuptR_c <- function(Ym, rupt, k){
+	A <- .C("meansqRuptR_c", data=as.double(Ym), position=as.integer(rupt), k=as.integer(k), res=double(k), PACKAGE="cghseg")	
+	return(A$res)
+}
+
 
 retour <- function(path, i){
    chaine <- integer(i)
@@ -242,6 +247,42 @@ EMalgo <- function(x,phi,rupt,P,vh=TRUE){
     storage.mode(phi) <-"double"
     storage.mode(rupt) <- "double"
     .Call("sc_EMalgo",x,phi,rupt,as.integer(K),as.integer(P),as.logical(vh))
+  }
+  
+}
+
+
+compactEMalgo <- function(xk,x2k,phi,nk,P,vh=TRUE){
+  checkoptions = TRUE
+  K = length(xk)
+  
+  if (P>K){
+    checkoptions = FALSE
+    cat("Error in EMalgo : the number of groups must be lower than the number of segments","\n")
+  }
+  if (checkoptions == TRUE){
+    storage.mode(xk)<-"double"
+    storage.mode(x2k)<-"double"
+    storage.mode(nk)<-"double"
+    storage.mode(phi) <-"double"
+     .Call("sc_compactEMalgo",xk,x2k,phi,nk,as.integer(K),as.integer(P),as.logical(vh))
+  }
+  
+}
+
+
+compactEMinit <- function(xk,x2k,nk,P,vh=TRUE){
+  checkoptions = TRUE
+  K = length(xk)
+  if (P>K){
+    checkoptions = FALSE
+    cat("Error in EMinit : the number of groups must be lower than the number of segments","\n")
+  }
+  if (checkoptions == TRUE){
+    storage.mode(xk)<-"double"
+    storage.mode(x2k)<-"double"
+    storage.mode(nk)<-"double"    
+    .Call("sc_compactEMinit",xk,x2k,nk,as.integer(K),as.integer(P),as.logical(vh))
   }
   
 }

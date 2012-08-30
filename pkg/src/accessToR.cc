@@ -32,5 +32,22 @@ extern "C" {
         res[i] = sum/double(count);
     }
   }
+  void meansqRuptR_c(double * data, int* position, int*k, double* res){
+    unsigned int j=0;
+    for (unsigned int i=0; i<*k; i++){
+        double sum = 0.;
+        unsigned int count = 0;
+        while(j<=(position[i]-1)){ // R to C++ -> -1
+            //if (!isnan(data[j])){
+            if (!R_IsNA(data[j])){
+                count++;
+                sum += data[j]*data[j];
+            }
+            j++;
+        }
+        res[i] = sum/double(count);
+    }
+  }
+
 }
 

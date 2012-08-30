@@ -13,7 +13,9 @@ extern "C" {
   SEXP sc_segmixt(SEXP x, SEXP lmin, SEXP lmax, SEXP Kmax, SEXP phi, SEXP P);
   SEXP sc_segibp(SEXP ContrastR, SEXP KseqR, SEXP multiKmaxR);
   SEXP sc_EMalgo(SEXP xR, SEXP phiR, SEXP ruptR, SEXP KR, SEXP PR, SEXP vhR);
+  SEXP sc_compactEMalgo(SEXP xkR, SEXP x2kR, SEXP phiR, SEXP nkR, SEXP KR, SEXP PR, SEXP vhR);
   SEXP sc_EMinit(SEXP xR, SEXP ruptR, SEXP KR, SEXP PR, SEXP vhR);
+  SEXP sc_compactEMinit(SEXP xR,SEXP x2R, SEXP nkR, SEXP KR, SEXP PR, SEXP vhR);
 }
 
 #endif

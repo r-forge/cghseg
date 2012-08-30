@@ -37,6 +37,28 @@ CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)
 ## toutes les fonctions multi... utilisent du uni... qu'on pourrait paralleliser
 ## l'algo de recherche du minimum du BIC par l'algo des cordes : golden.search.R
 
+<<<<<<< .mine
+Individual segmentations for patients 
+            
+Res = lapply(names(.Object@Y), FUN = function(m){
+  n     = length(which(!is.na(.Object@Y[[m]])))
+  Kmax  = uniKmax[[m]]
+  out   = unisegmixt(.Object@Y[[m]],CGHo,Kmax,phi)
+  J.est = n*exp(-((2/n)*out$loglik+log(2*pi)+1))
+  invisible(list(t.est = out$t.est, loglik = out$loglik,J.est=J.est))
+}) 
+names(Res) = names(.Object@Y)
+
+
+Res = lapply(.Object@Y, FUN = function(y,K){
+  cat(names(y),"-",K,"\n")
+},uniKmax)
+
+
+
+
+names(Res) = names(.Object@Y)
+=======
 ## others
 calling(CGHo)  = T
 CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)
@@ -48,3 +70,21 @@ CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)
 calling(CGHo)  = T
 wavenorm(CGHo) = "spline"
 CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)
+>>>>>>> .r19
+
+
+library(cghseg)
+n = 100
+x = rnorm(n,0,1)
+K    = 4
+rupt = matrix(Inf,K,2)
+rupt[,1] =c(1,5,50,80)
+rupt[,2] =c(4,49,79,100)
+phi = c(0,2,1,1,0.5,0.5)
+nk = rupt[,2]-rupt[,1]+1
+xk = sapply(1:K,FUN=function(k){mean(x[rupt[k,1]:rupt[k,2]])})
+x2k = sapply(1:K,FUN=function(k){mean(x[rupt[k,1]:rupt[k,2]]^2)})
+EMinit(x,rupt,P=2,vh=TRUE)
+compactEMinit(xk,x2k,nk,P=2,vh=TRUE)
+compactEMalgo(xk,x2k,phi,nk,P=2,vh=TRUE)
+
