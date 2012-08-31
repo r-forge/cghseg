@@ -9,23 +9,29 @@ setMethod(f = "ILSclust",signature = "CGHdata",
            
             command = parse(text = " mu = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau) \n invisible(list(mu = mu, theta = B,loglik = loglik,nbiter = iter))")    
 
-            nbdata   = lapply(.Object@Y,FUN = function(y){length(y[!is.na(y)])}) 
-            nbdata   = sum(unlist(nbdata))    
+            nbdata   = Reduce("sum",lapply(.Object@Y,FUN = function(y){length(y[!is.na(y)])}) )
             M        = length(names(.Object@Y))
             n.com    = length(.Object@Y[[1]])
             eps      = Inf
             delta    = Inf
             iter     = 0
 
+	    mu                  = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi,cl)$mu
+            out.DP2EM           = DP2EM(.Object,mu)            
+	    out.EM              = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P,vh=TRUE)
+
+
             ## first iteration to initialize the epsilon algorithm
             ## initialize param$tm1
             mu        = multisegmean(.Object,CGHo,uniKmax,multiKmax)$mu
             out.DP2EM = DP2EM(.Object,mu)
-            phi       = EMinit(out.DP2EM$signal,out.DP2EM$rupt,P,vh=TRUE)
-            out.EM    = EMalgo(out.DP2EM$signal, phi, out.DP2EM$rupt, P, vh = TRUE)
+            phi       = compactEMinit(out.DP2EM$xk,out.DP2EM$x2k,out.DP2EM$nk,P,vh=TRUE)
+            out.EM    = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P,vh=TRUE)
             mu.test   = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau)
-            nk        = unlist(lapply(mu.test,function(x){x$end-x$begin+1}))
-            muk       = unlist(lapply(mu.test,function(x){x$mean}))
+            #nk        = unlist(lapply(mu.test,function(x){x$end-x$begin+1}))
+            #muk       = unlist(lapply(mu.test,function(x){x$mean}))
+	    nk        = Reduce("c",lapply(mu.test,function(x){x$end-x$begin+1}))
+            muk       = Reduce("c",lapply(mu.test,function(x){x$mean}))
             B         = list(waveffect = rep(0,n.com), GCeffect = rep(0,n.com))
             param     = list(tm1 = rep(muk,nk),
                                t = rep(muk,nk),
@@ -37,17 +43,19 @@ setMethod(f = "ILSclust",signature = "CGHdata",
             removebias(.Object) = B$waveffect+B$GCeffect
             mu                  = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi)$mu
             out.DP2EM           = DP2EM(.Object,mu)
-            out.EM              = EMalgo(out.DP2EM$signal, out.EM$phi, out.DP2EM$rupt, P, vh = TRUE)
+            #out.EM              = EMalgo(out.DP2EM$signal, out.EM$phi, out.DP2EM$rupt, P, vh = TRUE)
+	    out.EM    = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P,vh=TRUE)
             revertbias(.Object) = B$waveffect+B$GCeffect
             mu.test             = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau) 
-            pred                = lapply(names(.Object@Y),FUN = function(m){
-              nk  = mu.test[[m]]$end-mu.test[[m]]$begin+1
-              muk = mu.test[[m]]$mean
-              invisible(B$waveffect+B$GCeffect+ rep(muk,nk))
-            })
-            names(pred)   = names(.Object@Y)
-            pred          = unlist(pred,use.names=TRUE)
-            param$t       = pred
+            #pred                = lapply(names(.Object@Y),FUN = function(m){
+            #  nk  = mu.test[[m]]$end-mu.test[[m]]$begin+1
+            #  muk = mu.test[[m]]$mean
+            #  invisible(B$waveffect+B$GCeffect+ rep(muk,nk))
+            #})
+            #names(pred)   = names(.Object@Y)
+            #pred          = unlist(pred,use.names=TRUE)
+            #param$t       = pred
+	    param$t       = Reduce("c",lapply(mu.test,FUN = function(x){rep(x$mean,x$end-x$begin+1)}))
             param.dot.tm2 = param$t
             
             
@@ -57,17 +65,19 @@ setMethod(f = "ILSclust",signature = "CGHdata",
               removebias(.Object) = B$waveffect+B$GCeffect
               mu                  = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi)$mu
               out.DP2EM           = DP2EM(.Object,mu)
-              out.EM              = EMalgo(out.DP2EM$signal, out.EM$phi, out.DP2EM$rupt, P, vh = TRUE)
+              #out.EM              = EMalgo(out.DP2EM$signal, out.EM$phi, out.DP2EM$rupt, P, vh = TRUE)
+	      out.EM              = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P,vh=TRUE)
               revertbias(.Object) = B$waveffect+B$GCeffect
               mu.test             = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau) 
-              pred                = lapply(names(.Object@Y),FUN = function(m){
-                nk  = mu.test[[m]]$end-mu.test[[m]]$begin+1
-                muk = mu.test[[m]]$mean
-                invisible(B$waveffect+B$GCeffect+ rep(muk,nk))
-              })
-              names(pred) = names(.Object@Y)
-              pred        = unlist(pred,use.names=TRUE)
-              param$tp1   = pred           
+              #pred                = lapply(names(.Object@Y),FUN = function(m){
+              #  nk  = mu.test[[m]]$end-mu.test[[m]]$begin+1
+              #  muk = mu.test[[m]]$mean
+              #  invisible(B$waveffect+B$GCeffect+ rep(muk,nk))
+              #})
+              #names(pred) = names(.Object@Y)
+              #pred        = unlist(pred,use.names=TRUE)
+              #param$tp1   = pred           
+	      param$tp1 = Reduce("c",lapply(mu,FUN = function(x){rep(x$mean,x$end-x$begin+1)}))
               
               param.dot.tm1 = param$t + invnorm( invnorm(param$tm1-param$t) + invnorm(param$tp1-param$t) )              
               param$tm1     = param$t

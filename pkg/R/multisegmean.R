@@ -36,8 +36,7 @@ setMethod(f = "multisegmean",signature = "CGHdata",
 			cat("multisegmean finishing                  \r")  
             
             J.est              = lapply(Res,FUN = function(x){x$J.est})
-            nbdata             = lapply(.Object@Y,FUN = function(y){length(y[!is.na(y)])}) 
-            nbdata             = sum(unlist(nbdata))    
+            nbdata       = sum(Reduce("c",lapply(.Object@Y,FUN = function(y){length(y[!is.na(y)])})))
             out.ibp            = segibp(data.frame(J.est = unlist(J.est)),unlist(uniKmax),multiKmax)
             multiloglik        = -(nbdata/2)*(log(2*pi*out.ibp[[1]]/nbdata)+1)
             seg.rep            = out.ibp[[2]]

@@ -28,6 +28,8 @@ multiKmax    = getmultiKmax(CGHd,CGHo,uniKmax)
 ## fonction generale pour la segmentation multivariee
 CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)
 
+
+
 ## options :
 ## select(CGHo)   = "none" ou "mBIC" : selection du nombre de segment. Soit pas de selection (donc Kmax segments) ou critere BIC modifié
 ## calling(CGHo)  = T/F : utilisation du modèle de segmentation/clustering (T) pour réduire le nombre de niveaux des segments
