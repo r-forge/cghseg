@@ -8,7 +8,7 @@ library(cghseg)
 ## SNR : Signal to Noise Ratio (+grand +facile)
 ## lambda : SNR bis (auxiliaire)
 
-simul        = simulprofiles(M=50,n=100,k.mean=10,SNR=5,lambda=10)
+simul        = simulprofiles(M=50,n=100,k.mean=10,SNR=1,lambda=10)
 ## simul$Y : matrice des (n x M) signaux
 
 ## CGHdata : classe d'objet pour les data

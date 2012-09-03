@@ -1,6 +1,6 @@
 setMethod(f = "multisegclust",signature = "CGHdata",
           definition = function(.Object,CGHo,uniKmax,multiKmax){			  
-			  
+            
             P            = CGHo["nblevels"]
             tol          = 1e-2
             select.tmp   = CGHo["select"]
@@ -9,77 +9,57 @@ setMethod(f = "multisegclust",signature = "CGHdata",
             nbdata       = Reduce("sum",lapply(.Object@Y,FUN = function(y){length(y[!is.na(y)])}))
             iter         = 0
             eps          = Inf		
-			
-		if (CGHo@nbprocs>1){				
-				# Initial data sends, will be reused but not resend
-				# Data are emulated to belong to .GlobalEnv
-				# since worker function will also belong to .GlobalEnv
-				cl <- makeCluster(getOption("cl.cores", CGHo@nbprocs))
-				assign("Y.ref", .Object@Y, envir = .GlobalEnv)
-				clusterExport(cl, "Y.ref")
-				assign("uniKmax.ref", uniKmax, envir = .GlobalEnv)
-				clusterExport(cl, "uniKmax.ref")
-				assign("CGHo.ref", CGHo, envir = .GlobalEnv)
-				clusterExport(cl, "CGHo.ref")
-			}
-		
+            
+            if (CGHo@nbprocs>1){				
+              ## Initial data sends, will be reused but not resend
+              ## Data are emulated to belong to .GlobalEnv
+              ## since worker function will also belong to .GlobalEnv
+              cl <- makeCluster(getOption("cl.cores", CGHo@nbprocs))
+              assign("Y.ref", .Object@Y, envir = .GlobalEnv)
+              clusterExport(cl, "Y.ref")
+              assign("uniKmax.ref", uniKmax, envir = .GlobalEnv)
+              clusterExport(cl, "uniKmax.ref")
+              assign("CGHo.ref", CGHo, envir = .GlobalEnv)
+              clusterExport(cl, "CGHo.ref")
+            }
+            
 	    mu        = multisegmean(.Object,CGHo,uniKmax,multiKmax,cl)$mu
             out.DP2EM = DP2EM(.Object,mu)
             phi       = compactEMinit(out.DP2EM$xk,out.DP2EM$x2k,out.DP2EM$nk,P,vh=TRUE)
-            out.EM    = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P,vh=TRUE)
-
+            out.EM    = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P,vh=TRUE)            
             n.com     = length(.Object@Y[[1]])
             mu.test   = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau)
-            nk        = Reduce("c",lapply(mu.test,function(x){x$end-x$begin+1}))
-            muk       = Reduce("c",lapply(mu.test,function(x){x$mean}))
-            param     = list(tm1 = rep(muk,nk),
-                               t = rep(muk,nk),
-                             tp1 = rep(muk,nk))					 
-
+            A         = lapply(mu.test,FUN=function(x){rep(x$mean,x$end-x$begin+1)})
+	    param     = list(tm1 = A,t=A,tp1 = A)
+            rm(A)
             ## second iteration to initialize the epsilon algorithm
             ## initialize param$t
-            mu                  = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi,cl)$mu
-            out.DP2EM           = DP2EM(.Object,mu)            
-	    out.EM              = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P,vh=TRUE)
-            mu.test             = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau) 
-            #pred                = lapply(names(.Object@Y),FUN = function(m){
-            #  nk  = mu.test[[m]]$end-mu.test[[m]]$begin+1
-            #  muk = mu.test[[m]]$mean
-            #  invisible(rep(muk,nk))
-            #})
-            #names(pred)   = names(.Object@Y)
-            #pred          = unlist(pred,use.names=TRUE)
-            #param$tp1   = pred 
-            param$p1t       = Reduce("c",lapply(mu.test,FUN = function(x){rep(x$mean,x$end-x$begin+1)}))
+            mu            = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi,cl)$mu
+            out.DP2EM     = DP2EM(.Object,mu)            
+	    out.EM        = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P,vh=TRUE)
+            mu.test       = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau) 
+            param$t       = lapply(mu.test,FUN=function(x){rep(x$mean,x$end-x$begin+1)})
             param.dot.tm2 = param$t
-
+            
             while ( (eps > tol) & (iter < CGHo@itermax) ){   
-              iter      = iter+1 
-              mu        = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi,cl)$mu
-              out.DP2EM = DP2EM(.Object,mu)
-	      out.EM    = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P,vh=TRUE)			  
-              mu.test   = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau) 
-              #pred      = lapply(names(.Object@Y),FUN = function(m){
-              #  nk  = mu.test[[m]]$end-mu.test[[m]]$begin+1
-              #  muk = mu.test[[m]]$mean
-              #  invisible(rep(muk,nk))
-              #})
-              #names(pred) = names(.Object@Y)
-              #pred        = unlist(pred,use.names=TRUE)
-              #param$tp1   = pred  
-	      param$tp1     = Reduce("c",lapply(mu.test,FUN = function(x){rep(x$mean,x$end-x$begin+1)}))
-              param.dot.tm1 = param$t + invnorm( invnorm(param$tm1-param$t) + invnorm(param$tp1-param$t) )            
+              iter          = iter+1 
+              mu            = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi,cl)$mu
+              out.DP2EM     = DP2EM(.Object,mu)
+	      out.EM        = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P,vh=TRUE)			  
+              mu.test       = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau) 
+              param$tp1     = lapply(mu.test,FUN=function(x){rep(x$mean,x$end-x$begin+1)})              
+              param.dot.tm1 = lapply(names(.Object@Y),FUN=function(m,x,y,z){y[[m]] + invnorm( invnorm(x[[m]]-y[[m]]) + invnorm(z[[m]]-y[[m]])) },param$tm1,param$t,param$tp1)
+              ##param.dot.tm1 = param$t + invnorm( invnorm(param$tm1-param$t) + invnorm(param$tp1-param$t) )            
               param$tm1     = param$t
               param$t       = param$tp1         
-              eps           = sum( (param.dot.tm1-param.dot.tm2)^2 )
+              ##eps           = sum( (param.dot.tm1-param.dot.tm2)^2 )
+              eps = Reduce("sum",lapply(names(.Object@Y),FUN=function(m,x,y){sum( (x[[m]]-y[[m]])^2 )},param.dot.tm1,param.dot.tm2))              
               if (is.nan(eps)) {eps=0} 
               param.dot.tm2 = param.dot.tm1
-
-              
             } # end while
-			if (CGHo@nbprocs>1){
-				stopCluster(cl)
-			}
+            if (CGHo@nbprocs>1){
+              stopCluster(cl)
+            }
             
 ######   output   #####################################################################
             
