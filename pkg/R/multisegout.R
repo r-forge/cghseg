@@ -3,7 +3,7 @@ setMethod(f = "multisegout",signature = "CGHdata",
             
             M  = length(names(.Object@Y))
             
-            out = lapply(names(.Object@Y),FUN = function(m){
+            out = lapply(names(.Object@Y),FUN = function(m,y){
               i        = which(row.names(seg.rep) == m)
               k        = seg.rep[i,Kselect-M+1]
               rupt     = matrix(Inf,ncol = 2 , nrow= k)
@@ -13,13 +13,12 @@ setMethod(f = "multisegout",signature = "CGHdata",
               } else {
                 rupt[,1] = c(1,rupt[1:(k-1),2]+1)
               }			  
-			  Ym = .Object@Y[[m]]
-			  resmean = meanRuptR_c(Ym, rupt[,2], k)
+	      resmean = meanRuptR_c(y[[m]], rupt[,2], k)
               mu      = data.frame(begin = rupt[,1],
               end     = rupt[,2],
               mean    = resmean)
               invisible(mu)
-            })
+            },.Object@Y)
             names(out) = names(.Object@Y)
             invisible(out)
           })
