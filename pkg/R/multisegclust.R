@@ -10,20 +10,20 @@ setMethod(f = "multisegclust",signature = "CGHdata",
             iter         = 0
             eps          = Inf		
             
-            if (CGHo@nbprocs>1){				
+            if (CGHo@nbprocs>1){
               ## Initial data sends, will be reused but not resend
               ## Data are emulated to belong to .GlobalEnv
               ## since worker function will also belong to .GlobalEnv
-              cl <- makeCluster(getOption("cl.cores", CGHo@nbprocs))
+              #cl <- makeCluster(getOption("cl.cores", CGHo@nbprocs))
               assign("Y.ref", .Object@Y, envir = .GlobalEnv)
-              clusterExport(cl, "Y.ref")
+              clusterExport(CGHo@cluster, "Y.ref")
               assign("uniKmax.ref", uniKmax, envir = .GlobalEnv)
-              clusterExport(cl, "uniKmax.ref")
+              clusterExport(CGHo@cluster, "uniKmax.ref")
               assign("CGHo.ref", CGHo, envir = .GlobalEnv)
-              clusterExport(cl, "CGHo.ref")
+              clusterExport(CGHo@cluster, "CGHo.ref")
             }
             
-	    mu        = multisegmean(.Object,CGHo,uniKmax,multiKmax,cl)$mu
+	    mu        = multisegmean(.Object,CGHo,uniKmax,multiKmax)$mu
             out.DP2EM = DP2EM(.Object,mu)
             phi       = compactEMinit(out.DP2EM$xk,out.DP2EM$x2k,out.DP2EM$nk,P,vh=TRUE)
             out.EM    = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P,vh=TRUE)            
@@ -44,7 +44,7 @@ setMethod(f = "multisegclust",signature = "CGHdata",
             
             while ( (eps > tol) & (iter < CGHo@itermax) ){   
               iter          = iter+1 
-              mu            = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi,cl)$mu
+              mu            = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi)$mu
               out.DP2EM     = DP2EM(.Object,mu)
 	      out.EM        = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P,vh=TRUE)			  
               mu.test       = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau) 
@@ -60,9 +60,10 @@ setMethod(f = "multisegclust",signature = "CGHdata",
               ##param.dot.tm2 = param.dot.tm1
 		
             } # end while
-            if (CGHo@nbprocs>1){
-              stopCluster(cl)
-            }
+			
+#            if (CGHo@nbprocs>1){
+#              stopCluster(cl)
+#            }
             
 ######   output   #####################################################################
             

@@ -1,5 +1,5 @@
 setMethod(f = "multisegmixt",signature = "CGHdata",
-          definition = function(.Object,CGHo,uniKmax,multiKmax,phi,cl){
+          definition = function(.Object,CGHo,uniKmax,multiKmax,phi){
 
             P            = length(phi)/3
             select.tmp   = CGHo["select"]
@@ -17,10 +17,10 @@ setMethod(f = "multisegmixt",signature = "CGHdata",
 					invisible(list(t.est = out$t.est, loglik = out$loglik,J.est=J.est))
 				}
 				environment(unisegmixt.proxy) <- .GlobalEnv
-				clusterExport(cl, "unisegmixt")	# to be know in unisegmixt.proxy
+				clusterExport(CGHo@cluster, "unisegmixt")	# to be know in unisegmixt.proxy
 				assign("phi.ref", phi, envir = .GlobalEnv)
-				clusterExport(cl, "phi.ref")			
-				Res = parLapply(cl, names(Y.ref), fun = unisegmixt.proxy)
+				clusterExport(CGHo@cluster, "phi.ref")			
+				Res = parLapply(CGHo@cluster, names(Y.ref), fun = unisegmixt.proxy)
 				names(Res) = names(.Object@Y)
 			}
 			else{	

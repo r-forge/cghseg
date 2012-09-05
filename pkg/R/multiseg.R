@@ -18,9 +18,17 @@ setMethod(f = "multiseg",signature = "CGHdata",
                 cat("[multiseg] multisegmean running \n")
                 Res = multisegmean(.Object,CGHo,uniKmax,multiKmax)
               } else {
+				  if (CGHo@nbprocs>1){		
+					  CGHo@cluster <- makeCluster(getOption("cl.cores", CGHo@nbprocs))
+				  }
+				cat("Golden search                           \n")
                 Kh        = golden.search(.Object,CGHo,uniKmax,multiKmax)
+				cat("Best segmentation                       \n")
                 multiKmax = Kh
                 eval(fun2run(CGHo))
+				if (CGHo@nbprocs>1){
+					stopCluster(CGHo@cluster)
+				}
               }              
             } else {
               eval(fun2run(CGHo))

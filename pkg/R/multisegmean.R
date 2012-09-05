@@ -1,5 +1,5 @@
 setMethod(f = "multisegmean",signature = "CGHdata",
-          definition = function(.Object,CGHo,uniKmax,multiKmax,cl){
+          definition = function(.Object,CGHo,uniKmax,multiKmax){
            
             select.tmp   = CGHo["select"]
             select(CGHo) = "none"
@@ -8,7 +8,7 @@ setMethod(f = "multisegmean",signature = "CGHdata",
             Kseq         = c(M:multiKmax)
             
 ######   Individual segmentations for patients 
-            if (CGHo@nbprocs>1){	
+            if (CGHo@nbprocs>1){
               cat("multisegmean //               \r")
               unisegmean.proxy <- function(m){
                 n                           = length(which(!is.na(Y.ref[[m]])))
@@ -18,8 +18,8 @@ setMethod(f = "multisegmean",signature = "CGHdata",
                 invisible(list(t.est = out$t.est, loglik = out$loglik,J.est=J.est))
               }
               environment(unisegmean.proxy) <- .GlobalEnv
-              clusterExport(cl, "unisegmean")	# to be know in unisegmixt.proxy
-              Res = parLapply(cl, names(.Object@Y), fun = unisegmean.proxy) 
+              clusterExport(CGHo@cluster, "unisegmean")	# to be know in unisegmixt.proxy
+              Res = parLapply(CGHo@cluster, names(.Object@Y), fun = unisegmean.proxy) 
               names(Res) = names(.Object@Y)
             }
             else{
@@ -51,7 +51,7 @@ setMethod(f = "multisegmean",signature = "CGHdata",
             } else if (select.tmp=="mBIC"){
               if (CGHo@nbprocs>1){	
                 cat("multisegmean // part 2                  \r") 				
-                mBIC = parSapply(cl, Kseq, FUN=function(K){
+                mBIC = parSapply(CGHo@cluster, Kseq, FUN=function(K){
                   mu      = multisegout(.Object,seg.rep,Res,K)
                   getmBIC(K,multiloglik[K-M+1],mu,CGHo)     
                 })
