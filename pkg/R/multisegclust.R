@@ -29,18 +29,7 @@ setMethod(f = "multisegclust",signature = "CGHdata",
             out.EM    = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P,vh=TRUE)            
             n.com     = length(.Object@Y[[1]])
             mu.test   = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau)
-            ##A         = lapply(mu.test,FUN=function(x){rep(x$mean,x$end-x$begin+1)})
-	    #param     = list(tm1 = A,t=A,tp1 = A)
-            #rm(A)
-            ## second iteration to initialize the epsilon algorithm
-            ## initialize param$t
-	    mu.tmp = mu.test	
-            ##mu            = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi,cl)$mu
-            ##out.DP2EM     = DP2EM(.Object,mu)            
-	    ##out.EM        = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P,vh=TRUE)
-            ##mu.test       = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau) 
-            ##param$t       = lapply(mu.test,FUN=function(x){rep(x$mean,x$end-x$begin+1)})
-            ##param.dot.tm2 = param$t
+	    mu.tmp    = mu.test	
             
             while ( (eps > tol) & (iter < CGHo@itermax) ){   
               iter          = iter+1 
@@ -48,17 +37,8 @@ setMethod(f = "multisegclust",signature = "CGHdata",
               out.DP2EM     = DP2EM(.Object,mu)
 	      out.EM        = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P,vh=TRUE)			  
               mu.test       = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau) 
-              ##param$tp1     = lapply(mu.test,FUN=function(x){rep(x$mean,x$end-x$begin+1)})              
-              ##param.dot.tm1 = lapply(names(.Object@Y),FUN=function(m,x,y,z){y[[m]] + invnorm( invnorm(x[[m]]-y[[m]]) + invnorm(z[[m]]-y[[m]])) },param$tm1,param$t,param$tp1)
-              ##param.dot.tm1 = param$t + invnorm( invnorm(param$tm1-param$t) + invnorm(param$tp1-param$t) )            
-              ##param$tm1     = param$t
-              ##param$t       = param$tp1         
-              ##eps           = sum( (param.dot.tm1-param.dot.tm2)^2 )
               eps = max(sapply(names(.Object@Y),FUN=function(m,x,y){xk = rep(x[[m]]$mean,x[[m]]$end-x[[m]]$begin+1); yk =rep(y[[m]]$mean,y[[m]]$end-y[[m]]$begin+1) ; return(max(abs((xk-yk)/xk)))},mu.tmp,mu.test))
 	      mu.tmp = mu.test
-              ##if (is.nan(eps)) {eps=0} 
-              ##param.dot.tm2 = param.dot.tm1
-		
             } # end while
 			
 #            if (CGHo@nbprocs>1){
@@ -129,4 +109,4 @@ lvinc.MSC  <- function (x,phi,rupt,P){
 }
 
 
-invnorm <- function(x){x/sum(x^2)}
+

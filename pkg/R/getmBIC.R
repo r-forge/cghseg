@@ -7,13 +7,13 @@ getmBIC <- function(K,lv,mu,CGHo){
     mBIC = ((N-K+1)/2)*(lv*(2/N)+1+log(2*pi))-0.5*Ent -(K-M)*log(N)+lgamma((N-K+1)/2)-((N-K+1)/2)*log(N)
   } else {
     P  = CGHo["nblevels"]
-    Np = lapply(mu,FUN=function(x){
-      nk = x$end-x$begin+1
-      rep(x$levels,nk)
+    Np = sapply(mu,FUN=function(x){
+	tabulate(rep(x$levels,x$end-x$begin+1),P)
     })
-    Np   = tabulate(unlist(Np))
+    Np = apply(Np,1,sum)	
     Ent  = sum(log(Np))
     mBIC = ((N-P+1)/2)*(lv*(2/N)+1+log(2*pi))-0.5*Ent-(K-M)*log(N)+lgamma((N-P+1)/2)-((N-P+1)/2)*log(N)
   }
   return(mBIC)
 }
+
