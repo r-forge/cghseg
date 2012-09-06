@@ -11,6 +11,18 @@ setMethod(f = "ILS",signature = "CGHdata",
             n.com    = length(.Object@Y[[1]])
             eps      = Inf
             iter     = 0
+			
+			if (CGHo@nbprocs>1){
+				## Initial data sends, will be reused but not resend
+				## Data are emulated to belong to .GlobalEnv
+				## since worker function will also belong to .GlobalEnv
+				assign("Y.ref", .Object@Y, envir = .GlobalEnv)
+				clusterExport(CGHo@cluster, "Y.ref")
+				assign("uniKmax.ref", uniKmax, envir = .GlobalEnv)
+				clusterExport(CGHo@cluster, "uniKmax.ref")
+				assign("CGHo.ref", CGHo, envir = .GlobalEnv)
+				clusterExport(CGHo@cluster, "CGHo.ref")
+			}
             
             mu       = multisegmean(.Object,CGHo,uniKmax,multiKmax)$mu
             B        = list(waveffect = rep(0,n.com), GCeffect = rep(0,n.com))

@@ -12,27 +12,39 @@ setMethod(f = "multiseg",signature = "CGHdata",
               cat("[check multiseg] check that GCcontent is a record in the data\n")
               stop()
             }
-            
+			
+			if (CGHo@nbprocs>1){		
+				CGHo@cluster <- makeCluster(getOption("cl.cores", CGHo@nbprocs))
+			}
+			
             if (CGHo["select"] != "none"){
               if ( (CGHo["calling"]==FALSE) & (CGHo["wavenorm"]=="none")  & (CGHo@GCnorm=="none")){
                 cat("[multiseg] multisegmean running \n")
+				if (CGHo@nbprocs>1){
+					## Initial data sends, will be reused but not resend
+					## Data are emulated to belong to .GlobalEnv
+					## since worker function will also belong to .GlobalEnv
+					assign("Y.ref", .Object@Y, envir = .GlobalEnv)
+					clusterExport(CGHo@cluster, "Y.ref")
+					assign("uniKmax.ref", uniKmax, envir = .GlobalEnv)
+					clusterExport(CGHo@cluster, "uniKmax.ref")
+					assign("CGHo.ref", CGHo, envir = .GlobalEnv)
+					clusterExport(CGHo@cluster, "CGHo.ref")
+				}
                 Res = multisegmean(.Object,CGHo,uniKmax,multiKmax)
               } else {
-				  if (CGHo@nbprocs>1){		
-					  CGHo@cluster <- makeCluster(getOption("cl.cores", CGHo@nbprocs))
-				  }
-				cat("Golden search                           \n")
                 Kh        = golden.search(.Object,CGHo,uniKmax,multiKmax)
-				cat("Best segmentation                       \n")
                 multiKmax = Kh
                 eval(fun2run(CGHo))
-				if (CGHo@nbprocs>1){
-					stopCluster(CGHo@cluster)
-				}
               }              
             } else {
               eval(fun2run(CGHo))
             }
+			
+			if (CGHo@nbprocs>1){
+			  stopCluster(CGHo@cluster)
+			}
+			cat("\n")
             
             if ( (CGHo["wavenorm"]!="none") | (CGHo["GCnorm"]!="none")  ){
               theta(CGHr) =  Res$theta

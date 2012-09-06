@@ -8,7 +8,7 @@ library(cghseg)
 ## SNR : Signal to Noise Ratio (+grand +facile)
 ## lambda : SNR bis (auxiliaire)
 
-simul        = simulprofiles(M=50,n=100,k.mean=10,SNR=1,lambda=10)
+simul        = simulprofiles(M=50,n=1000,k.mean=10,SNR=1,lambda=10)
 ## simul$Y : matrice des (n x M) signaux
 
 ## CGHdata : classe d'objet pour les data
@@ -17,6 +17,7 @@ simul        = simulprofiles(M=50,n=100,k.mean=10,SNR=1,lambda=10)
 
 CGHd         = new("CGHdata",Y=simul$Y)
 CGHo         = new("CGHoptions")
+nbprocs(CGHo) = 4
 
 ## pour déterminer combien de segments au max par profil
 ## plus Kmax augmente pour chaque profil plus ca coute cher (l'algo est de complexité (Kmax x n) pour chaque profil)
@@ -39,8 +40,21 @@ CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)
 ## toutes les fonctions multi... utilisent du uni... qu'on pourrait paralleliser
 ## l'algo de recherche du minimum du BIC par l'algo des cordes : golden.search.R
 
-<<<<<<< .mine
-Individual segmentations for patients 
+## others
+calling(CGHo)  = T
+CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)
+
+calling(CGHo)  = F
+wavenorm(CGHo) = "spline"
+CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)
+
+calling(CGHo)  = T
+wavenorm(CGHo) = "spline"
+CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)
+
+
+
+## Individual segmentations for patients 
             
 Res = lapply(names(.Object@Y), FUN = function(m){
   n     = length(which(!is.na(.Object@Y[[m]])))
@@ -60,19 +74,6 @@ Res = lapply(.Object@Y, FUN = function(y,K){
 
 
 names(Res) = names(.Object@Y)
-=======
-## others
-calling(CGHo)  = T
-CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)
-
-calling(CGHo)  = F
-wavenorm(CGHo) = "spline"
-CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)
-
-calling(CGHo)  = T
-wavenorm(CGHo) = "spline"
-CGHr         = multiseg(CGHd,CGHo,uniKmax,multiKmax)
->>>>>>> .r19
 
 
 library(cghseg)

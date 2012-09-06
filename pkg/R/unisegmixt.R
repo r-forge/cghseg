@@ -1,5 +1,4 @@
 unisegmixt <- function(Y,CGHo,Kmax,phi){
-  #ptm = proc.time()
   P            = CGHo["nblevels"]
   n.com        = length(Y)
   present.data = which(!is.na(Y))
@@ -21,8 +20,6 @@ unisegmixt <- function(Y,CGHo,Kmax,phi){
     mean  = rep(NA,Kmax)
     )  
 	
-  #elapsed = proc.time() - ptm
-  #cat(elapsed," by ",Sys.getpid(),"\n")
   invisible(list(mu=mu,loglik=loglik,t.est=t.est))
   
 }

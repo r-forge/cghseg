@@ -8,8 +8,8 @@ setMethod(f = "multisegmean",signature = "CGHdata",
             Kseq         = c(M:multiKmax)
             
 ######   Individual segmentations for patients 
-            if (CGHo@nbprocs>1){
-              cat("multisegmean //               \r")
+            if (CGHo@nbprocs>1){              
+			  cat("multisegmean //               \r")				
               unisegmean.proxy <- function(m){
                 n                           = length(which(!is.na(Y.ref[[m]])))
                 Kmax                        = uniKmax.ref[[m]]
@@ -33,7 +33,6 @@ setMethod(f = "multisegmean",signature = "CGHdata",
               names(Res) = names(.Object@Y)
             }
 ######   Segment Repartition segments across patients 
-            cat("multisegmean finishing                  \r")  
             
             J.est              = lapply(Res,FUN = function(x){x$J.est})
             nbdata       = sum(Reduce("c",lapply(.Object@Y,FUN = function(y){length(y[!is.na(y)])})))
@@ -55,10 +54,8 @@ setMethod(f = "multisegmean",signature = "CGHdata",
                   mu      = multisegout(.Object,seg.rep,Res,K)
                   getmBIC(K,multiloglik[K-M+1],mu,CGHo)     
                 })
-					#stopCluster(cl)
               }
               else{
-                cat("multisegmean part 2                     \r")
                 mBIC = sapply(Kseq,FUN=function(K){
                   mu      = multisegout(.Object,seg.rep,Res,K)
                   getmBIC(K,multiloglik[K-M+1],mu,CGHo)     
@@ -69,11 +66,11 @@ setMethod(f = "multisegmean",signature = "CGHdata",
             }
             
 ######   Outputs   
-            cat("multisegmean finishing part 2           \r")  
             
             mu           = multisegout(.Object,seg.rep,Res,multiKselect)
-            select(CGHo) = select.tmp			
-            cat("multisegmean finished                   \r")  
+            select(CGHo) = select.tmp  
+			if (CGHo@nbprocs>1){	
+			cat("multisegmean finished                  \r") 		
             invisible(list(mu=mu,loglik=multiloglik[dimll],nbiter=0))
           } 
           )

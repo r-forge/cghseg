@@ -54,7 +54,7 @@ namespace cghseg
     for (int k=_K;k>=_P+1;k--){
       int imin    = 2; 
       int jmin    = 1; 
-      double dmin = Dist(2,1);      
+      double dmin = Dist(2,1); 
       for (int i=2; i<k+1 ; i++){
 	for (int j=1; j<i ; j++){
 	  if (Dist(i,j)<=dmin){
@@ -99,13 +99,17 @@ namespace cghseg
       }  
     
       int size_index= index.size();
-    
+
+      //#pragma omp parallel
+      //      {
+      //#pragma omp for   
       for (int h=1;h<size_index+1;h++){
 	int i          = index[h-1];
 	double ybar    =  (nk(i)*mk(i)+ntmp*mtmp)/(nk(i)+ntmp);
 	double varpool =  (  ntmp*vtmp + nk(i)*vk(i) + ntmp*(mtmp-ybar)*(mtmp-ybar) + nk(i)*(mk(i)-ybar)*(mk(i)-ybar) ) / (ntmp+nk(i));
 	Dtmp(i)        = -nk(i)*vk(i)-ntmp*vtmp+ (nk(i)+ntmp)*varpool;	
       }
+      //      }
       double auxm = mk(imin); mk(imin) = mk(k);  mk(k) = auxm;
       double auxv = vk(imin); vk(imin) = vk(k);  vk(k) = auxm;
       int    auxn = nk(imin); nk(imin) = nk(k);  nk(k) = auxn;
@@ -174,17 +178,21 @@ namespace cghseg
     for (int p = 0; p < 3*_P; p++)
       _phi[p] = 0;
   
-    for (int k =0; k<_K; k++)
-      _tau[k] = new double[_P];
-    
+    _tau[0] = new double[_K*_P];
+    for (int k =1; k<_K; k++)
+      _tau[k] =  _tau[k-1] + _P;    
     for (int k =0; k<_K; k++){
       for (int p =0; p<_P; p++){
 	_tau[k][p] = 0;
       }
     }
-  
+
+    int nbD = ((_K-1)*_K)/2; // 1 -> _K-1 elements
+    _D[0] = new double[nbD];
+    for (int k =1; k<_K-1; k++){
+      _D[k] = _D[k-1]+ k;
+    }
     for (int k =0; k<_K-1; k++){
-      _D[k] = new double[k+1];
       for (int r=0; r<k+1; r++){
 	_D[k][r] = 0;
       }
@@ -218,12 +226,10 @@ namespace cghseg
     delete[] _nk0;
     delete[] _Dtmp;
   
-    for (int k =0; k<_K; k++)
-      delete[] _tau[k];
+    delete[] _tau[0];
     delete[] _tau;
-    for (int k =0; k<_K-1; k++)
-      delete[] _D[k];
-    delete[] _D;  
+    delete[] _D[0];
+    delete[] _D; 
   } // end destructor
 
   void   

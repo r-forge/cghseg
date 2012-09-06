@@ -10,7 +10,7 @@ setMethod(f = "golden.search",signature = "CGHdata",
             instr      = fun2run(CGHo)
 
             # first grid
-  
+			
             Kmax         = multiKmax-M+1
             per          = 2  #percent
             Kseq1        = seq(0,Kmax,by=floor((Kmax-1)/floor(per*Kmax/100)))+M  #K=Kmin:Kmax

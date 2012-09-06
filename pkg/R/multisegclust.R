@@ -14,7 +14,6 @@ setMethod(f = "multisegclust",signature = "CGHdata",
               ## Initial data sends, will be reused but not resend
               ## Data are emulated to belong to .GlobalEnv
               ## since worker function will also belong to .GlobalEnv
-              #cl <- makeCluster(getOption("cl.cores", CGHo@nbprocs))
               assign("Y.ref", .Object@Y, envir = .GlobalEnv)
               clusterExport(CGHo@cluster, "Y.ref")
               assign("uniKmax.ref", uniKmax, envir = .GlobalEnv)
@@ -41,9 +40,6 @@ setMethod(f = "multisegclust",signature = "CGHdata",
 	      mu.tmp = mu.test
             } # end while
 			
-#            if (CGHo@nbprocs>1){
-#              stopCluster(cl)
-#            }
             
 ######   output   #####################################################################
             
