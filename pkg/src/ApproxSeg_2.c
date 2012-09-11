@@ -1,0 +1,79 @@
+#include <R.h>
+#include <Rinternals.h>
+#include <gsl/gsl_math.h>
+
+#define NUMLIB_POSINF GSL_POSINF
+
+void ClassiSegProba(double *sequence, int *lgSeq, int *nStep, double *res1, int *res2, int *nbClasse, 
+			   double *moyennes, double *logP, double *variance_){
+  /* Compteurs et autres */
+  int i, j, k, l, indice;
+	double variance = variance_[0];
+  /* Variable temporaires */
+  double * vTmp;
+  vTmp = (double *) malloc( *nbClasse * sizeof(double));
+	for(i =0; i < *nbClasse; i++) vTmp[i]= logP[i]; 
+
+  int * whichCome;
+  whichCome = (int *) malloc( *nbClasse * sizeof(int));
+  for(i =0; i < *nbClasse; i++) whichCome[i]=-1;
+
+  double min, tMin;
+  int whichMin;
+
+  for(i = 0; i < *lgSeq; i++)
+   for(k= 0; k < *nStep; k++) 
+     res1[(*lgSeq)*k+i] = NUMLIB_POSINF;
+
+  /* intialisation */
+  for(i =0; i < *lgSeq; i++)
+  {
+    min=NUMLIB_POSINF;
+    for(l =0; l < *nbClasse; l++)
+    {		
+      vTmp[l] = vTmp[l] + (sequence[i] - moyennes[l])*(sequence[i] - moyennes[l]) / variance;	   
+      if(min > vTmp[l]) min  = vTmp[l];	
+    }
+    res1[i] = min;
+    res2[i] = 0;  	
+  }
+  /* main loop */
+	
+  for(k =1; k < *nStep; k++)
+  {
+    for(l =0; l < *nbClasse; l++) vTmp[l]= NUMLIB_POSINF;
+    for(l =0; l < *nbClasse; l++) whichCome[l]=0;
+	
+    for(i=k; i < *lgSeq; i++)
+    {
+      min=NUMLIB_POSINF;
+      for(l =0; l < *nbClasse; l++)
+      {
+        indice = (*lgSeq)*(k-1)+i-1;
+        if( vTmp[l] > res1[indice] ) /* on change de segment */
+        {
+	      vTmp[l] = res1[indice] + (sequence[i] - moyennes[l])*(sequence[i] - moyennes[l]) / variance + 
+			logP[l];
+          whichCome[l]=i;	
+		 } else /* pas de changement de segment */
+		 {
+           vTmp[l] = vTmp[l] + (sequence[i] - moyennes[l])*(sequence[i] - moyennes[l]) / variance;
+         }
+
+	if(vTmp[l] < min)
+        {
+	  min=vTmp[l];
+	  whichMin=l;
+	}
+      }	
+      indice = (*lgSeq)*k+i;			
+      res1[indice] = min;
+      res2[indice] = whichCome[whichMin];
+			
+     }
+   }
+	
+   free(vTmp);
+   free(whichCome);
+}
+
