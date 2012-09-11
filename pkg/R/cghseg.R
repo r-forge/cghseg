@@ -292,6 +292,24 @@ compactEMalgo <- function(xk,x2k,phi,nk,P,vh=TRUE){
   
 }
 
+quicklvinc <- function(xk,x2k,phi,nk,P,vh=TRUE){
+  checkoptions = TRUE
+  K = length(xk)
+  
+  if (P>K){
+    checkoptions = FALSE
+    cat("Error in EMalgo : the number of groups must be lower than the number of segments","\n")
+  }
+  if (checkoptions == TRUE){
+    storage.mode(xk)<-"double"
+    storage.mode(x2k)<-"double"
+    storage.mode(nk)<-"double"
+    storage.mode(phi) <-"double"
+     .Call("sc_lvinc",xk,x2k,phi,nk,as.integer(K),as.integer(P),as.logical(vh))
+  }
+  
+}
+
 
 compactEMinit <- function(xk,x2k,nk,P,vh=TRUE){
   checkoptions = TRUE
@@ -324,3 +342,5 @@ EMinit <- function(x,rupt,P,vh=TRUE){
   }
   
 }
+
+

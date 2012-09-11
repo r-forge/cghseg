@@ -72,5 +72,6 @@ setMethod(f = "multisegmean",signature = "CGHdata",
 			if (CGHo@nbprocs>1){	
 			cat("multisegmean finished                  \r") 		
             invisible(list(mu=mu,loglik=multiloglik[dimll],nbiter=0))
+			}
           } 
           )
