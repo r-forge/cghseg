@@ -24,7 +24,8 @@ ClassiSeg <- function(geno, grille, Kmax){
 	diag(res3) <- ncol(A$res1)
 	return(list(J.est=A$res1[,Kmax],t.est=res3))
 	} 
-
+### logP = donner -logProba du melange
+### variance = variance du modèle
 ClassiSeg_2 <- function(geno, grille, Kmax, logP, variance){
 	nRow <- length(geno)
 	nGrille <- length(grille)
@@ -47,6 +48,27 @@ ClassiSeg_2 <- function(geno, grille, Kmax, logP, variance){
 	return(list(J.est=A$res1[,Kmax],t.est=res3))
 } 
 
+ClassiSeg_ <- function(geno, grille, Kmax){
+	nRow <- length(geno)
+	nGrille <- length(grille)
+      	### Appel C
+	A <- .C("ClassiSeg",as.double(geno), as.integer(nRow), as.integer(Kmax),  res1=double(Kmax*nRow), res2=integer(Kmax*nRow), as.integer(nGrille), moyennes=as.double(grille), PACKAGE="cghseg")
+	A$res1 <- matrix(A$res1, nrow=Kmax, byrow=TRUE)
+	A$res2 <- matrix(A$res2, nrow=Kmax, byrow=TRUE)
+	return(A)
+	} 
+
+ClassiSeg_2_ <- function(geno, grille, Kmax, logP, variance){
+	nRow <- length(geno)
+	nGrille <- length(grille)
+### Appel C
+	A <- .C("ClassiSegProba",as.double(geno), as.integer(nRow), as.integer(Kmax),  res1=double(Kmax*nRow), 
+			res2=integer(Kmax*nRow), as.integer(nGrille), moyennes=as.double(grille), 
+			logP=as.double(logP), variance=as.double(variance), PACKAGE="cghseg")
+	A$res1 <- matrix(A$res1, nrow=Kmax, byrow=TRUE)
+	A$res2 <- matrix(A$res2, nrow=Kmax, byrow=TRUE)
+	return(A)
+} 
 colibriR_c <- function(signalBruite, Kmax, mini=min(signalBruite), maxi=max(signalBruite)){
 	n <- length(signalBruite)
     A <- .C("colibriR_c", signal=as.double(signalBruite), n=as.integer(n), Kmax=as.integer(Kmax),   min=as.double(mini), max=as.double(maxi), path=integer(Kmax*n), cost=double(Kmax)

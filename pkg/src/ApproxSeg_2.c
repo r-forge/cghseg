@@ -50,7 +50,7 @@ void ClassiSegProba(double *sequence, int *lgSeq, int *nStep, double *res1, int 
       for(l =0; l < *nbClasse; l++)
       {
         indice = (*lgSeq)*(k-1)+i-1;
-        if( vTmp[l] > res1[indice] ) /* on change de segment */
+        if( vTmp[l] > res1[indice] + logP[l] ) /* on change de segment */
         {
 	      vTmp[l] = res1[indice] + (sequence[i] - moyennes[l])*(sequence[i] - moyennes[l]) / variance + 
 			logP[l];
