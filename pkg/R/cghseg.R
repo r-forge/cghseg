@@ -305,7 +305,7 @@ quicklvinc <- function(xk,x2k,phi,nk,P,vh=TRUE){
     storage.mode(x2k)<-"double"
     storage.mode(nk)<-"double"
     storage.mode(phi) <-"double"
-     .Call("sc_lvinc",xk,x2k,phi,nk,as.integer(K),as.integer(P),as.logical(vh))
+     .Call("sc_Lvinc",xk,x2k,phi,nk,as.integer(K),as.integer(P),as.logical(vh))
   }
   
 }

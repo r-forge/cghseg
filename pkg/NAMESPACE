@@ -11,4 +11,4 @@ exportMethods("getuniKmax","getmultiKmax")
 exportMethods("getbp","getsegprofiles","getlevels","getbgoutliers")
 exportMethods("multiseg","uniseg","multisegmean","ILSclust.output","multisegmixt")
 
-export("simulprofiles","unisegmixt","unisegmean","EMalgo","compactEMalgo","compactEMinit","EMinit","meanRuptR_c","meansqRuptR_c","DP2EM","segibp")
+export("simulprofiles","unisegmixt","unisegmean","EMalgo","compactEMalgo","compactEMinit","EMinit","meanRuptR_c","meansqRuptR_c","DP2EM","segibp","quicklvinc")

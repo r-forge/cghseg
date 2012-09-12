@@ -17,7 +17,7 @@ simul        = simulprofiles(M=50,n=1000,k.mean=10,SNR=1,lambda=10)
 
 CGHd         = new("CGHdata",Y=simul$Y)
 CGHo         = new("CGHoptions")
-nbprocs(CGHo) = 4
+nbprocs(CGHo) = 1
 
 ## pour déterminer combien de segments au max par profil
 ## plus Kmax augmente pour chaque profil plus ca coute cher (l'algo est de complexité (Kmax x n) pour chaque profil)
@@ -90,4 +90,4 @@ x2k = sapply(1:K,FUN=function(k){mean(x[rupt[k,1]:rupt[k,2]]^2)})
 EMinit(x,rupt,P=2,vh=TRUE)
 compactEMinit(xk,x2k,nk,P=2,vh=TRUE)
 compactEMalgo(xk,x2k,phi,nk,P=2,vh=TRUE)
-
+quicklvinc(xk,x2k,phi,nk,P=2,vh=TRUE)

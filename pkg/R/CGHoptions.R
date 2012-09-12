@@ -13,7 +13,7 @@ setClass("CGHoptions",
            alpha     = 'numeric',
            beta      = 'numeric',
            nbprocs   = 'numeric',
-		   cluster	 = 'parallelCluster',
+           cluster   = 'parallelCluster',
            itermax   = 'numeric'),
          prototype(select    = "mBIC",
                    calling   = FALSE,
@@ -23,7 +23,7 @@ setClass("CGHoptions",
                    alpha     = 0.2,
                    beta      = 0.5,
                    nbprocs   = 1,
-				   cluster = makeCluster(getOption("cl.cores", 0)),
+                   cluster = makeCluster(getOption("cl.cores", 0)),
                    itermax   = Inf)
          )
 
@@ -39,7 +39,7 @@ setMethod(
             if (i=="alpha")      {return(x@alpha)}       else {}
             if (i=="beta")       {return(x@beta)}        else {}
             if (i=="nbprocs")    {return(x@nbprocs)}     else {}
-			if (i=="cluster")    {return(x@cluster)}     else {}
+            if (i=="cluster")    {return(x@cluster)}     else {}
             if (i=="itermax")    {return(x@itermax)}     else {}
           }          
           )
@@ -68,8 +68,8 @@ setMethod(
             A[8,2]  = x@nbprocs            
             A[9,1]  = "cluster"
             A[9,2]  = x@cluster           
-			A[10,1]  = "itermax"
-			A[10,2]  = x@itermax
+            A[10,1]  = "itermax"
+            A[10,2]  = x@itermax
             print(A)            
           }          
           )
@@ -96,10 +96,10 @@ setMethod(
             A[7,2]  = object@beta
             A[8,1]  = "nbprocs"
             A[8,2]  = object@nbprocs
-            A[9,1]  = "itermax"
-            A[9,2]  = object@itermax
-			A[10,1]  = "itermax"
-			A[10,2]  = object@itermax
+            A[9,1]  = "cluster"
+            A[9,2]  = object@cluster
+            A[10,1]  = "itermax"
+            A[10,2]  = object@itermax
             print(A)            
           }          
           )

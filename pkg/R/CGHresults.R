@@ -14,11 +14,11 @@ setClass("CGHresults",
            options          = 'CGHoptions'
            )
          )
-         
+
 setMethod("initialize",
           "CGHresults",
           function(.Object,CGHd,CGHo){
-
+            
             .Object@mu      = NULL
             .Object@theta   = NULL
             .Object@loglik  = list()
@@ -33,7 +33,7 @@ setMethod("initialize",
             if (length(names(CGHd@Y)>1)){
               .Object@theta = list(waveffect=0,GCeffect=0)
             }         
-
+            
             .Object@options          = CGHo
             .Object@genomic.position = CGHd@genomic.position
             .Object@probeID          = CGHd@probeID

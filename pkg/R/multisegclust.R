@@ -31,19 +31,19 @@ setMethod(f = "multisegclust",signature = "CGHdata",
 	    mu.tmp    = mu.test	
             
             while ( (eps > tol) & (iter < CGHo@itermax) ){   
-              iter          = iter+1 
-              mu            = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi)$mu
-              out.DP2EM     = DP2EM(.Object,mu)
-	      out.EM        = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P,vh=TRUE)			  
-              mu.test       = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau) 
-              eps = max(sapply(names(.Object@Y),FUN=function(m,x,y){xk = rep(x[[m]]$mean,x[[m]]$end-x[[m]]$begin+1); yk =rep(y[[m]]$mean,y[[m]]$end-y[[m]]$begin+1) ; return(max(abs((xk-yk)/xk)))},mu.tmp,mu.test))
-	      mu.tmp = mu.test
+              iter       = iter+1 
+              mu         = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi)$mu
+              out.DP2EM  = DP2EM(.Object,mu)
+	      out.EM     = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P,vh=TRUE)			  
+              mu.test    = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau) 
+              eps        = max(sapply(names(.Object@Y),FUN=function(m,x,y){xk = rep(x[[m]]$mean,x[[m]]$end-x[[m]]$begin+1); yk =rep(y[[m]]$mean,y[[m]]$end-y[[m]]$begin+1) ; return(max(abs((xk-yk)/xk)))},mu.tmp,mu.test))
+	      mu.tmp     = mu.test
             } # end while
 			
             
 ######   output   #####################################################################
-            
-            loglik       = lvmixt.MSC(.Object,mu,out.EM$phi)
+            out.DP2EM    = DP2EM(.Object,mu)
+            loglik       = quicklvinc(out.DP2EM$xk,out.DP2EM$x2k,out.EM$phi,out.DP2EM$nk,P,vh=TRUE)$lvinc
             select(CGHo) =  select.tmp
             eval(command)
             
@@ -73,36 +73,3 @@ setMethod(f = "multisegclust.output",signature = "CGHdata",
             invisible(mutmp)
           }
           )
-
-setMethod(f = "lvmixt.MSC",signature = "CGHdata",
-          definition = function(.Object,mu,phi){
-            P     = length(phi)/3
-            chrom = names(.Object@Y)
-            lv = sum(unlist( lapply(names(.Object@Y),FUN = function(m){
-              Ym    = .Object@Y[[m]]
-              ruptm = mu[[m]][-3]
-              lvinc.MSC(Ym,phi,ruptm,P)
-            })))
-            invisible(lv)
-          }
-          )
-
-
-lvinc.MSC  <- function (x,phi,rupt,P){
-  logdensity  = t(apply(rupt, 1,FUN = function(y){
-    xk  = x[y[1]:y[2]]
-    xk  = xk[!is.na(xk)]
-    invisible(logdens(xk,P, phi))
-  }))
-  K       = nrow(logdensity)
-  P       = ncol(logdensity)
-  tau     = sapply(1:P,FUN = function(p){logdensity[,p]+log(phi[p+2*P])})
-  tau     = matrix(tau,ncol=P)
-  tau_max = apply(tau,1,max)
-  tau     = exp(tau-matrix(rep(tau_max,P),ncol=P))
-  lvinc   = sum(log( apply(tau,1,sum)) + tau_max)
-  return(lvinc)
-}
-
-
-
