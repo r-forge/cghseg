@@ -1,0 +1,257 @@
+\documentclass[a4paper,12pt,twoside]{report}
+
+\usepackage[latin1]{inputenc}
+%\usepackage[francais]{babel}
+\usepackage{subfigure}
+\usepackage{graphicx}
+
+\usepackage{graphics}
+\usepackage{dsfont}
+\usepackage{natbib}
+\usepackage{amsfonts, amsmath, amssymb}
+\usepackage{enumerate}
+\usepackage{stmaryrd}
+\usepackage{color}
+\usepackage{ulem}
+\renewcommand{\baselinestretch}{2}
+
+\textwidth  16cm
+\textheight 22cm
+\topmargin 0 cm
+\oddsidemargin 0 cm
+\evensidemargin 0 cm
+
+\usepackage{float}
+\floatstyle{ruled}
+
+\newfloat{Algorithm}{thp}{lop}
+\floatname{Algorithm}{Algorithm}
+
+\newtheorem{de}{Definition}[subsection] % les définitions et les théorémes sont
+\newtheorem{theo}{Theorem}[section]    % numérotés par section
+\newtheorem{lem}[theo]{Lemma}
+\newtheorem{cor}[theo]{Corrolary}
+\newtheorem{prop}[theo]{Proposition}
+
+
+\title{Fast seg-clust}
+\author{Guillem Rigaill}
+
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+
+\section{Abstract}
+The cghseg-clust method relies on a dynamic programming (DP) - Expectation Maximization (EM) algorithm.
+For large CGH-like profiles ($n > 10^4$) the DP step of the DP-EM algorithm is a burden as it has a $\Theta(Kn^2)$ time complexity, where $K$ is the maximum number of change-point one want to look for. 
+cghseg-clust is based on a mixture model which leads to a loss function which is segment additive.
+Here we approximate the mixture model loss in a K-mean fashion. The approximate loss is point additive.
+Using this point additiveness we derive an  $\Theta(KPn)$, where $P$ is the number of component in the mixture.
+
+Multi-core...
+
+Simulations and applications...
+
+
+%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%
+%%% DEFINITIONS
+%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+...
+
+
+\section{Background / Notations}
+We consider a signal of length $n$, $\{X_i\}_{i < n}$ with $X_i \in \mathbf{R}$.
+A segment $r$ is delimited by two change-points and is denoted
+ $r = \llbracket t_1, t_2 \rrbracket$.
+We define the set of all segmentations in $k$ segments as $\mathcal{M}^{(K)}_{(r)} = \mathcal{M}^{(K)}_{t_1, t_2}$.
+The $k$-th change of segmentation $m$ in $K$ segments will be denoted $\tau_k$ with the convention that $\tau_0 = 1$ and $\tau_K = n+1$.
+The $k-th$ segment is denoted $r_k$.
+
+
+Using the notations of seg-clust (\cite{picard_2007}) the cost of a given segment is :
+$$ C_{t_1, t_2} =C_{(r)} = -log\left(\sum_p \pi_p exp\{ - \frac{\sum_{i \in r} (x_i - \mu_p)^2 }{ \sigma^2} \}\right)$$ 
+The optimal segmentation in $K$ segments from $t_1$ to $t2$ is defined as :
+$$C_{t_1, t_2}^{(K)} = C^{(K)}_{(r)} = min_{m \in \mathcal{M}^{(K)}_{(r)}} \{ \sum_{k \leq K} C(r_k) \}.$$
+
+The cost or loss of segmentation is segment additive. 
+Here we propose to approximate this loss in a K-mean fashion, more specifically:
+$$ C_{t_1, t_2} =C_{(r)} \approx  min_p \{ \sum_{i \in r}\frac{(x_i - \mu_p)^2} {\sigma^2 }\}$$ 
+
+
+\paragraph{Add, improvement.. ?}
+We should probably keep the $log\pi_p$:
+$$ C_{t_1, t_2} =C_{(r)} \approx  min_p \{ \sum_{i \in r}\frac{(x_i - \mu_p)^2} {\sigma^2 } + log(\pi_p) \} .$$
+I think this does not involve a lot of change in the C code.
+Keeping the $\pi_p$ we would the guarantee that
+$$ \text{approx-loss} \leq \text{true-loss}
+\leq  \text{approx-loss} + log(p). $$
+Using this we could guarante that for a given set of means and proportions the segmentation in K that we recover using the approximation is within $Klog(p)$ of the true best segmentation (without the segmentation).
+We should probably discuss that one advantage of the K-mean loss is the absence of numerical issues in comparison with the mixture model loss.
+
+
+\paragraph{Some more notations}
+
+We define the cost of a segment knowing its mean $\mu$ as
+$$ C_{t_1, t_2} (\mu) =C_{(r)}  (\mu) = \{ \sum_{i \in r} (x_i - \mu)^2  / \sigma^2 \}.$$
+Using this notation we can rewrite the approximated loss as:
+$$ C_{t_1, t_2} =C_{(r)} = min_p \{  C_{t_1, t_2} (\mu_p) \}$$
+$C_{t_1, t_2} (\mu)$ is point additive in the sense that $C_{t_1, t_2+1} (\mu) = C_{t_1, t_2} (\mu) + C_{t_2 +1, t_2+1} (\mu)$.
+Using this property one can efficiently pruned the set of canditate segmentations as in \cite{rigaill_2010}. 
+In our case given that the set of possible values for $\mu_p$ is finite we can even guarantee the time and space complexity of the algorithm to be linear in $n$, more specifically $\Theta(KPn)$. 
+In practise, this enable this analysis of much larger profiles.
+
+%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%
+%%% STD DPA
+%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Standard dynamic programming of seg-clust (do we really need this section?)}
+
+The cost of a given segmentation is the sum of the cost of its segments. 
+Thus the Bellman optimality principal holds and we have:
+
+$$ C_{1, t}^{(k+1)} = min_{\tau \leq t} \{ C_{1, \tau -1}^{(k)}  + C_{\tau, t} \} $$
+%More generally for any $k_1 (>0)$ and $k_2 (> 0)$   we have
+%$$ C_{1, t}^{(k_1 + k_2)} = min_{\tau \leq t} \{ C_{1, \tau -1}^{(k_1)}  + C_{\tau, t}^{(k_2)} \} $$
+
+Using this update rule one can build a dynamic programming algorithm to recover all $ C_{1, t}^{(k+1)}$ for all $t \leq n$ and all $k \leq K$.
+For example this can be done using algorithm \ref{algo:DPA2}. This algorithm assume that all $C_{i, j}$ have been pre-compute and stored in 
+a $n$ by $n$ metric $\mathbf{C}$ or that they can be efficiently compute on the fly, which is the case for the mixture model loss of seg-clust. 
+
+At step $k, t$ of algorithm \ref{algo:DPA2} less than $\Theta(t)$ basic operations are performed. 
+If we sum these for all $k < K$ and $t < n$  we see that the algorithm has an $\Theta(K_{max}n^2)$ time complexity. 
+\begin{Algorithm}
+\caption{Standard algorithm }\label{algo:DPA2}
+
+\begin{tabular}{c} 
+
+\begin{tabular}{ll}
+    \textbf{Input}:& $y_i$ a sequence of $n$ data-points, $K_{max}$ an integer \\
+   \textbf{Output}:& $C^{(k)}_{1,t}$ in $\mathbb{R}$ for all $k \leq K_{max}$ and $t \leq n$ \\
+    & $M^{(k)}_{1,t}$ in $\mathbb{N}$ for all $k \leq K_{max}$ and $t \leq n$ \\
+   %& $M^{(k)}_{1,t}$ in $\mathbb{N}$ for all $k \times K$ and $t \leq n$ \\
+    \textbf{Initialize}& \\
+   & \textbf{For} $t \in \llbracket 1, n \rrbracket$ \\
+   & \begin{tabular}{ll}
+     & $C^{(1)}_{1,t} = C_{1t}$ \\
+    % & $M^{(1)}{1,t} = 0$  
+    \end{tabular} \\
+   & \textbf{End For} \\
+
+   \textbf{Main} & \\
+   & \textbf{For} $k \in \llbracket 2, min(t, K) \rrbracket$ \\
+   & \#\# Start Minimization \\
+   & \begin{tabular}{ll}
+     & \textbf{For} $t \in \llbracket 1, n \rrbracket$ \\
+     &    \begin{tabular}{ll}
+           & $C^{(k)}_{1,t} = min_{k-1 \leq \tau \leq t-1} \{ C^{(k-1)}_{1,\tau}+ C_{(\tau+1)t} \}$ \\
+          & $M^{(k)}_{1,t} =arg min_{k-1 \leq \tau \leq t-1} \{ C^{(k-1)}_{1,\tau}+ C_{(\tau+1)t} \}$ \\
+          \end{tabular} \\
+     & \textbf{End For} 
+      \end{tabular} \\
+    & \#\# End Minimization \\
+
+ & \textbf{ End For}
+\end{tabular}
+\end{tabular}
+
+\end{Algorithm}
+
+\section{A linear DP for the classification loss}
+
+We define the cost of the best segmentation knowing that the mean of the last segment is $\mu$ as :
+
+$$ C_{1, t}^{(k)}(\mu) = min_{m \in \mathcal{M}^{(K)}_{(1, t)}} \{ \sum_{k < K-1} C(r_k)  + C(r_K)(\mu) \} $$
+Using this notation we get that :
+$$ C_{1, t}^{(k)}  = min_{p < P} \{ C_{1, t}^{(k)}(\mu_p) \}$$
+
+Using this equation, if at step $t$ we know all $C_{1, t}^{(k)}(\mu_p)$ for all $p < P$ we straightfowardly get $C_{1, t}^{(k)}$ in $\Theta(p)$.
+Let us now demonstrate the following theorem that enable an easy and fast update of  $C_{1, t}^{(k)}(\mu_p)$.
+
+\begin{theo}
+$$ C_{1, t+1}^{(k)}(\mu) = min \{ C_{1, t}^{(k)}(\mu),  C_{1, t}^{(k-1)} \} +   \frac{(x_{t+1} - \mu)^2 }{\sigma^2} $$
+\end{theo}
+
+\paragraph{Proof. } Let us first notice that: 
+\begin{eqnarray*}
+C_{1, t+1}^{(k)}(\mu) = & min_{\tau < t+1} \{ C_{(1,\tau)}^{k-1}  + C_{(\tau+1, t)}(\mu) \}
+\end{eqnarray*}
+
+This can be written as:
+\begin{eqnarray*}
+C_{1, t+1}^{(k)}(\mu) = & min \left\{ min_{\tau < t} \left( C_{(1,\tau)}^{k-1}  + C_{(\tau+1, t+1)}(\mu) \right), \ C_{(1,t)}^{k-1} +  \frac{(x_{t+1} - \mu)^2 }{\sigma^2}  \right\} 
+\end{eqnarray*}
+
+
+For all $\tau, \tau' \leq t$ such that
+$$ C_{(1,\tau)}^{k}  + C_{(\tau+1, t)}(\mu) \leq C_{(1,\tau')}^{k}  + C_{(\tau'+1, t)}(\mu) $$
+ we have for $t' > t$ that :
+$$ C_{(1,\tau)}^{k}  + C_{(\tau+1, t)}(\mu) + \sum_{i = t+1}^{t'} \frac{(x_i - \mu)^2 }{\sigma^2} \leq C_{(1,\tau')}^{k}  + C_{(\tau'+1, t)}(\mu)  + \sum_{i = t+1}^{t'} \frac{(x_i - \mu)^2 }{\sigma^2}. $$
+Thus we get that $\forall \tau < t $ : 
+$$C_{1, t}^{(k)}(\mu) +  \frac{(x_{t+1} - \mu)^2  }{ \sigma^2} \leq C_{(1,\tau)}^{k} + C_{(\tau+1, t+1)}(\mu).$$
+From this the theorem follows.
+
+Using this theorem, knowing $C_{1, t}^{(k)}(\mu)$ and $C_{1, t}^{(k-1)}$ we get $C_{1, t+1}^{(k)}(\mu)$ in $\Theta(1)$.
+
+From this we derive algorithm \ref{algo:DPALinear} for the DP step of the DP-EM.
+For simplicity we do not include the initialization of $C^{(1)}_{1,t}$ for $t < n$ and $C^{(k)}_{1,1}(\mu_p)$.
+All $C^{(k)}_{1,1}(\mu_p)$ are initialized as $\infty$ and $C^{(1)}_{1,t}$ are initialized using their definition.
+
+\begin{Algorithm}
+\caption{Linear DP for classification loss }\label{algo:DPALinear}
+
+\begin{tabular}{c} 
+
+\begin{tabular}{ll}
+    \textbf{Input}:& $y_i$ a sequence of $n$ data-points, $K_{max}$ an integer \\
+& $C_{ij}$ cost of the segments $\rrbracket I, j \rrbracket$  for all $(i, j) \in \llbracket1, n \rrbracket^2$\\
+   \textbf{Output}:& $C^{(k)}_{1,t}$ in $\mathbb{R}$ for all $k \leq K_{max}$ and $t \leq n$ \\
+    & $M^{(k)}_{1,t}$ in $\mathbb{N}$ for all $k \leq K_{max}$ and $t \leq n$ \\
+   %& $M^{(k)}_{1,t}$ in $\mathbb{N}$ for all $k \times K$ and $t \leq n$ \\
+  %  \textbf{Initialize}& \\
+  % & \textbf{For} $t \in \llbracket 1, n \rrbracket$ \\
+  % & \begin{tabular}{ll}
+  %   & $C^{(1)}_{1,t} = C_{1t}$ \\
+    % & $M^{(1)}{1,t} = 0$  
+  %  \end{tabular} \\
+  % & \textbf{End For} \\
+
+   \textbf{Main} & \\
+   & \textbf{For} $k \in \llbracket 2, min(t, K) \rrbracket$  \\
+   & \#\# Start Minimization \\
+   & \begin{tabular}{ll}
+     & \textbf{For} $t \in \llbracket 1, n \rrbracket$\\
+     &    \begin{tabular}{ll}
+             & \textbf{For}  $p \in \llbracket 1, P \rrbracket$  \\
+              &    \begin{tabular}{ll}
+                     & $C^{(k)}_{1,t}(\mu_p) = min \{ C^{(k)}_{1,t-1}(\mu_p), C^{(k-1)}_{1,t-1} \}$ \\
+                     & $M^{(k)}_{1,t}(\mu_p) =arg min \{C^{(k)}_{1,t-1}(\mu_p), C^{(k-1)}_{1,t-1} \}$ \\
+                     \end{tabular} \\
+              & \textbf{End For}  \\
+        
+           & $C^{(k)}_{1,t} = min_{p } \{ C^{(k)}_{1,t}(\mu_p) \}$ \\
+           & $M^{(k)}_{1,t} = M^{(k)}_{1,t}( \mu_{arg min_{p } \{ C^{(k)}_{1,t}(\mu_p) \}}$ \\
+          \end{tabular} \\
+     & \textbf{End For} 
+      \end{tabular} \\
+    & \#\# End Minimization \\
+
+ & \textbf{ End For}
+\end{tabular}
+\end{tabular}
+
+\end{Algorithm}
+
+\bibliographystyle{plain}
+\bibliography{biblio}
+
+
+\end{document}
+
+
+
+
