@@ -11,15 +11,17 @@ setMethod(f = "multisegclust",signature = "CGHdata",
             eps          = Inf		
             
             if (CGHo@nbprocs>1){
-              ## Initial data sends, will be reused but not resend
-              ## Data are emulated to belong to .GlobalEnv
-              ## since worker function will also belong to .GlobalEnv
-              assign("Y.ref", .Object@Y, envir = .GlobalEnv)
-              clusterExport(CGHo@cluster, "Y.ref")
-              assign("uniKmax.ref", uniKmax, envir = .GlobalEnv)
-              clusterExport(CGHo@cluster, "uniKmax.ref")
-              assign("CGHo.ref", CGHo, envir = .GlobalEnv)
-              clusterExport(CGHo@cluster, "CGHo.ref")
+				if (Sys.info()["sysname"] == "Windows"){
+					## Initial data sends, will be reused but not resend
+					## Data are emulated to belong to .GlobalEnv
+					## since worker function will also belong to .GlobalEnv
+					assign("Y.ref", .Object@Y, envir = .GlobalEnv)
+					clusterExport(CGHo@cluster, "Y.ref")
+					assign("uniKmax.ref", uniKmax, envir = .GlobalEnv)
+					clusterExport(CGHo@cluster, "uniKmax.ref")
+					assign("CGHo.ref", CGHo, envir = .GlobalEnv)
+					clusterExport(CGHo@cluster, "CGHo.ref")
+				}
             }
             
 	    mu        = multisegmean(.Object,CGHo,uniKmax,multiKmax)$mu

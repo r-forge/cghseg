@@ -16,18 +16,20 @@ setMethod(f = "ILSclust",signature = "CGHdata",
             delta    = Inf
             iter     = 0
             
-            if (CGHo@nbprocs>1){
-              ## Initial data sends, will be reused but not resend
-              ## Data are emulated to belong to .GlobalEnv
-              ## since worker function will also belong to .GlobalEnv
-              assign("Y.ref", .Object@Y, envir = .GlobalEnv)
-              clusterExport(CGHo@cluster, "Y.ref")
-              assign("uniKmax.ref", uniKmax, envir = .GlobalEnv)
-              clusterExport(CGHo@cluster, "uniKmax.ref")
-              assign("CGHo.ref", CGHo, envir = .GlobalEnv)
-              clusterExport(CGHo@cluster, "CGHo.ref")
-            }
-            
+			if (CGHo@nbprocs>1){
+				if (Sys.info()["sysname"] == "Windows"){
+					## Initial data sends, will be reused but not resend
+					## Data are emulated to belong to .GlobalEnv
+					## since worker function will also belong to .GlobalEnv
+					assign("Y.ref", .Object@Y, envir = .GlobalEnv)
+					clusterExport(CGHo@cluster, "Y.ref")
+					assign("uniKmax.ref", uniKmax, envir = .GlobalEnv)
+					clusterExport(CGHo@cluster, "uniKmax.ref")
+					assign("CGHo.ref", CGHo, envir = .GlobalEnv)
+					clusterExport(CGHo@cluster, "CGHo.ref")
+				}
+			}
+			
             mu        = multisegmean(.Object,CGHo,uniKmax,multiKmax)$mu
             out.DP2EM = DP2EM(.Object,mu)
             phi       = compactEMinit(out.DP2EM$xk,out.DP2EM$x2k,out.DP2EM$nk,P,vh=TRUE)
