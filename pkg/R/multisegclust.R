@@ -26,7 +26,7 @@ setMethod(f = "multisegclust",signature = "CGHdata",
             
 	    mu        = multisegmean(.Object,CGHo,uniKmax,multiKmax)$mu
             out.DP2EM = DP2EM(.Object,mu)
-            phi       = compactEMinit(out.DP2EM$xk,out.DP2EM$x2k,out.DP2EM$nk,P,vh=TRUE)
+            phi       = compactEMinit(out.DP2EM$xk,out.DP2EM$x2k,out.DP2EM$nk,P,CGHo@nbprocs,vh=TRUE)
             out.EM    = compactEMalgo(out.DP2EM$xk,out.DP2EM$x2k,phi,out.DP2EM$nk,P,vh=TRUE)            
             n.com     = length(.Object@Y[[1]])
             mu.test   = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau)

@@ -8,11 +8,16 @@
 #include <vector>
 #include <cstring>
 
-#define  Dist(i,j) _D[i-2][j-1] 
-#define  nk(i)     _nk[i-1]
-#define  mk(i)     _mk[i-1]
-#define  vk(i)     _vk[i-1]
-#define  Dtmp(i)   _Dtmp[i-1]
+#include <Rconfig.h>
+#ifdef SUPPORT_OPENMP
+  #include <omp.h>
+#endif
+
+//#define  Dist(i,j) _D[i-2][j-1]
+//#define  nk(i)     _nk[i-1]
+//#define  mk(i)     _mk[i-1]
+//#define  vk(i)     _vk[i-1]
+//#define  Dtmp(i)   _Dtmp[i-1]
 
 
 using namespace std;
@@ -54,16 +59,8 @@ namespace cghseg
     for (int k=_K;k>=_P+1;k--){
       int imin    = 2; 
       int jmin    = 1; 
-      double dmin = Dist(2,1); 
-      for (int i=2; i<k+1 ; i++){
-	for (int j=1; j<i ; j++){
-	  if (Dist(i,j)<=dmin){
-	    dmin = Dist(i,j); 
-	    imin = i; 
-	    jmin = j;
-	  }
-	}
-      }
+      double dmin = Dist(2,1);
+      CAHmin(k, imin, jmin, dmin);
 
       int    ntmp = nk(imin)+nk(jmin);    
       double mtmp = (nk(imin)*mk(imin)+nk(jmin)*mk(jmin))/ntmp;
@@ -81,51 +78,30 @@ namespace cghseg
       if (jmin>1){ // 1:(jmin-1)
 	i1     = jmin-1;     
 	for (int h = 1; h<i1+1 ;h++){
-	  index.push_back(h);
+	    CAHcore(h, ntmp, mtmp, vtmp);
 	}
       } else {
 	i1 = 1;
-	index.push_back(1); 
+        CAHcore(1, ntmp, mtmp, vtmp);
       }
       if (jmin+1<=imin-1){ // (jmin+1):(imin-1)
 	i2     = imin-1-jmin-1+1;
 	for (int h=1;h<(i2+1);h++)
-	  index.push_back(h+jmin);
+          CAHcore(h+jmin, ntmp, mtmp, vtmp);
       } 
       if (imin+1<=(k)){// (imin+1):k
 	i3     = k-imin-1+1;
 	for (int h=1;h<(i3+1);h++)
-	  index.push_back(h+imin);
+          CAHcore(h+imin, ntmp, mtmp, vtmp);
       }  
     
-      int size_index= index.size();
-
-      //#pragma omp parallel
-      //      {
-      //#pragma omp for   
-      for (int h=1;h<size_index+1;h++){
-	int i          = index[h-1];
-	double ybar    =  (nk(i)*mk(i)+ntmp*mtmp)/(nk(i)+ntmp);
-	double varpool =  (  ntmp*vtmp + nk(i)*vk(i) + ntmp*(mtmp-ybar)*(mtmp-ybar) + nk(i)*(mk(i)-ybar)*(mk(i)-ybar) ) / (ntmp+nk(i));
-	Dtmp(i)        = -nk(i)*vk(i)-ntmp*vtmp+ (nk(i)+ntmp)*varpool;	
-      }
-      //      }
       double auxm = mk(imin); mk(imin) = mk(k);  mk(k) = auxm;
       double auxv = vk(imin); vk(imin) = vk(k);  vk(k) = auxm;
       int    auxn = nk(imin); nk(imin) = nk(k);  nk(k) = auxn;
       double auxk = Dtmp(k);
       Dtmp(k)     = Dtmp(imin);
-      Dtmp(imin)  = auxk;  
-      for (int i=1; i<(jmin-1+1);i++)
-	Dist(jmin,i) = Dtmp(i);
-      for (int i=jmin+1;i<(k-1+1);i++)
-	Dist(i,jmin) = Dtmp(i);
-      for (int j=1;j<(jmin-1+1);j++)
-	Dist(imin,j) = Dist(k,j);    
-      for (int j=jmin+1;j<(imin-1+1);j++)
-	Dist(imin,j) = Dist(k,j);
-      for (int i=imin+1;i<(k-1+1);i++)
-	Dist(i,imin) = Dist(k,i);
+      Dtmp(imin)  = auxk; 
+      CAHcopy(k, imin, jmin);
     
     } // end k
   } //end CAH
@@ -159,7 +135,8 @@ namespace cghseg
   } //end Init
 
 
-  compactEM_init::compactEM_init(int nbsegments, int nbclusters){
+  compactEM_init::compactEM_init(int nbsegments, int nbclusters, int OMP_NUM_THREADS){
+    omp_set_num_threads(OMP_NUM_THREADS);
 
     _K       = nbsegments; 
     _P       = nbclusters;
@@ -192,10 +169,19 @@ namespace cghseg
     for (int k =1; k<_K-1; k++){
       _D[k] = _D[k-1]+ k;
     }
-    for (int k =0; k<_K-1; k++){
-      for (int r=0; r<k+1; r++){
-	_D[k][r] = 0;
-      }
+    // for (int k =0; k<_K-1; k++){
+    //   for (int r=0; r<k+1; r++){
+    // 	_D[k][r] = 0;
+    //   }
+    // }
+
+#pragma omp parallel if (nbD>1000)
+    { // page placement by first touch
+#pragma omp for
+      for(int ii=0; ii<nbD; ++ii)
+	{
+	  *(_D[0]+ii) = 0.;
+	}
     }
   
     for (int k =0; k<_K; k++){
@@ -233,7 +219,7 @@ namespace cghseg
   } // end destructor
 
   void   
-  compute_compactEM_init(numlib_vector *xk,numlib_vector *x2k, numlib_vector *nk, int P , numlib_vector **phiend)
+  compute_compactEM_init(numlib_vector *xk,numlib_vector *x2k, numlib_vector *nk, int P , numlib_vector **phiend, int OMP_NUM_THREADS)
   {
         
     double *datak=new double[xk->size];
@@ -250,7 +236,7 @@ namespace cghseg
 
     int K   = nk->size;
 
-    compactEM_init compactEMi(K,P);
+    compactEM_init compactEMi(K,P,OMP_NUM_THREADS);
     compactEMi.Init(datak,data2k,datank);
     compactEMi.CAH();
     compactEMi.compute_phi();

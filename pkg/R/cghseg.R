@@ -333,7 +333,7 @@ quicklvinc <- function(xk,x2k,phi,nk,P,vh=TRUE){
 }
 
 
-compactEMinit <- function(xk,x2k,nk,P,vh=TRUE){
+compactEMinit <- function(xk,x2k,nk,P,R_OMP_NUM_THREADS, vh=TRUE){
   checkoptions = TRUE
   K = length(xk)
   if (P>K){
@@ -344,7 +344,7 @@ compactEMinit <- function(xk,x2k,nk,P,vh=TRUE){
     storage.mode(xk)<-"double"
     storage.mode(x2k)<-"double"
     storage.mode(nk)<-"double"    
-    .Call("sc_compactEMinit",xk,x2k,nk,as.integer(K),as.integer(P),as.logical(vh))
+    .Call("sc_compactEMinit",xk,x2k,nk,as.integer(K),as.integer(P),as.integer(R_OMP_NUM_THREADS),as.logical(vh))
   }
   
 }

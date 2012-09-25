@@ -646,7 +646,7 @@ SEXP sc_EMinit(SEXP xR, SEXP ruptR, SEXP KR, SEXP PR, SEXP vhR)
 }
 
 
-SEXP sc_compactEMinit(SEXP xkR, SEXP x2kR,SEXP nkR, SEXP KR, SEXP PR, SEXP vhR)
+SEXP sc_compactEMinit(SEXP xkR, SEXP x2kR,SEXP nkR, SEXP KR, SEXP PR, SEXP OMP_NUM_THREADSR, SEXP vhR)
 {
   
   SEXP res;
@@ -670,7 +670,7 @@ SEXP sc_compactEMinit(SEXP xkR, SEXP x2kR,SEXP nkR, SEXP KR, SEXP PR, SEXP vhR)
     datank[i] = REAL(nkR)[i];
 
   
-  compactEM_init compactEMi(K,P);  
+  compactEM_init compactEMi(K,P,*(INTEGER(OMP_NUM_THREADSR)));
   compactEMi.Init(datak,data2k,datank);
   compactEMi.CAH();
   compactEMi.compute_phi();
