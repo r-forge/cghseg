@@ -18,6 +18,9 @@
 \usepackage{algpseudocode}
 \usepackage{algorithmicx}
 \usepackage{algorithm}
+\usepackage{url}
+\usepackage[table]{xcolor}
+
 %\newfloat{Algorithm}{thp}{lop}
 %\floatname{Algorithm}{Algorithm}
 %\newtheorem{de}{Definition}[subsection] % les dÃ©finitions et les thÃ©orÃ©mes sont
@@ -25,6 +28,10 @@
 \newtheorem{lem}[theo]{Lemma}
 %\newtheorem{cor}[theo]{Corrolary}
 %\newtheorem{prop}[theo]{Proposition}
+
+\newcommand{\soft}{\texttt{cghseg}}
+\newcommand{\esoft}{\texttt{cghseg }}
+
 
 \begin{document}
 
@@ -52,6 +59,8 @@ Laboratoire de Biom\'etrie et Biologie Evolutive, UMR CNRS 5558 Universit\'{e} L
 \maketitle   
 
 \begin{abstract}
+\esoft is fast enough to segment more than 1,000 profiles of length 100,000 in less than ? hours (or less than an afternoon).
+
 \keywords{}
 \end{abstract}
 \section{Method}
@@ -276,6 +285,58 @@ Applying equation \ref{equation:boundproof1} to $m = \widehat{m}_{t_1, t_2}^{(K)
 to $m =  \widetilde{m}_{t_1, t_2}^{(K)}$ we get the theorem $\blacksquare$
 
 
+
+\subsection{The R package \esoft (or Implementation)}
+All the presented algorithms are available into the \texttt{R} package \soft, with all the computationaly intensive sections implemented in \texttt{C++}.
+The package is designed to be executed in parallel on multiprocessor architectures: 
+it relies on the standard \texttt{R} package \texttt{parallel} and on the shared memory programming standard \texttt{openMP}.
+Compilation and installation are compliant with the \texttt{R} standard procedure (\texttt{R}$\geq$ \texttt{2.14}). 
+\esoft is available on the \texttt{CRAN} at \url{http://cran.r-project.org/web/packages/cghseg} under the \texttt{GNU} public licence 
+(\url{http://www.gnu.org/licenses/licenses.html}).
+
+
+\section{Discussion}
+\subsection{Computationnal footprint and scalability (or \esoft is efficient and scalable in practice)}
+
+The software design take advantage of multiprocessing to treat the profiles in parallel at every step of the algorithm.
+To assess the quality of the parallel implementation, we developped a simulation scheme to analyze the \esoft execution time 
+with varying number of profiles and number of available CPU units (cores).
+We simulated $256, 512$ and $1024$ profiles of length $20,000$ with k.mean=10,SNR=5,lambda=10 and we run cghseg on $1,2,4,8,16,32,48$ cores Opteron 2.2 GHz.
+We observed a practical scalability (see Fig.\ref{figspeedup}) consistent with the expected speedup...
+Moreover, we remarked that the remaing sequential parts remains negligible due to the dynamic programming efficiency... in respect to the Amdahl's law[ref].
+
+While the main interest of \esoft is the quality of its results, the associated computational expense is affordable even
+for very large datasets. As a benchmark, we simulated datasets with $1024$ profiles of length $100,000$ with k.mean=10,SNR=5,lambda=10. 
+\esoft required about ??? minutes of calculation on average, corresponding to less than ?? hours elapsed time on $48$ cores Opteron 2.2 GHz (see Table \ref{tabtime}).
+
+Notice that we ran 5 times each simulation and averaged the results. 
+Endly, since the only amount of required memory corresponds to the profiles that are accessed threw the shared memory, the memory needs are reasonnable and order of magnitude....  (des chiffres)
+
+\begin{figure}[h!]
+  \begin{center}
+    \includegraphics[height=6.5cm]{figures/speedup}
+    \caption{Speedup}
+    \label{figspeedup}
+  \end{center}
+\end{figure}
+
+\begin{table}[h!]
+  \begin{center}
+    %\scriptsize{
+    %\scalebox{0.89}{
+    \begin{tabular}{>{\columncolor{lightgray}}c|ccc|ccc}
+      \hline
+      Length of the profiles &  \multicolumn{3}{c}{$20,000$} & \multicolumn{3}{c}{$100,000$} \\
+      Number of profiles & 256 & 512 & 1024 & 256 & 512 & 1024\\
+      \hline
+      Average CPU time (min) & 10 & 10 & 10 & 10 & 10 & 10 \\
+      \hline
+    \end{tabular}
+    %}
+    \caption{Average performance of . on $48$ cores Opteron 2.2 GHz + memory}
+    \label{tabtime}
+  \end{center}
+\end{table}
 \bibliographystyle{plain}
 \bibliography{biblio}
 
