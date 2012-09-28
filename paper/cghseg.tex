@@ -41,12 +41,12 @@
 %                                     also used for the TOC unless
 %                                     \toctitle is used
 %
-\author{G. Rigaill$^1$, V. Miele$^2$ and F. Picard$^2$}
+\author{Guillem Rigaill$^1$, Vincent Miele$^2$ and Franck Picard$^2$}
 %
 \authorrunning{Rigaill et al.} % abbreviated author list (for running head)
 %
 %%%% list of authors for the TOC (use if author list has to be modified)
-\tocauthor{Guillem Rigaill$^1$, Vincent Miele$^2$, Franck Picard$^2$}
+\tocauthor{G. Rigaill$^1$, V. Miele$^2$, F. Picard$^2$}
 %
 \institute{Laboratoire Statistique et G\'{e}nome, UMR CNRS 8071, USC INRA Universit\'{e} d'Evry, F-91037 Evry, France \\
 \email{rigaill@evry.inra.fr},\\ 
@@ -63,66 +63,58 @@ Laboratoire de Biom\'etrie et Biologie Evolutive, UMR CNRS 5558 Universit\'{e} L
 
 \keywords{}
 \end{abstract}
-\section{Method}
+\section{Linearization of Dynamic Programming for segmentation and segmentation/clustering} 
 
-\subsection{Background / Notations}
-We consider a signal of length $n$, $\{X_i\}_{i \leq n}$ with $X_i \in \mathbf{R}$.
-A segment $r$ is delimited by two change-points and is denoted
- $r = \llbracket t_1, t_2 \rrbracket$.
-We define the set of all segmentations of a segment $r$ in $K$ segments as $\mathcal{M}^{(K)}_{(r)} = \mathcal{M}^{(K)}_{t_1, t_2}$.
-The $k$-th change of segmentation $m$ in $K$ segments will be denoted by $\tau_k$ with the convention that $\tau_0 = 1$ and $\tau_K = n+1$.
-The $k-th$ segment is denoted by $r_k$.
-For a given segmentation in $K$ segments we have, $m = \{r_1, r_2 \ldots, r_K\}$ and for all $k \leq K$,  $r_k = \llbracket \tau_k, \tau_{k+1} -1\rrbracket$.
+The purpose of segmentation is to partition a signal of $n$ observations $\{X_i\}$ into $K$ segments of constant means. In this section we deal with the univariate segmentation of one array CGH profile, the case of Joint multivariate segmentation being considered in Section 3. In the following a segment is an interval delimited by two change-points $\tau_k, \tau_{k+1}$ for instance,  with convention $\tau_0 = 1$ and $\tau_K = n+1$, and notation $r_k=\llbracket \tau_k, \tau_{k+1} -1\rrbracket$ stands for segment $k$. A segmentation in $K$ segments is denoted by $m^{(K)} = \{r_1, r_2 \ldots, r_K\}$.
 
-Using the notations of seg-clust (\cite{picard_2007}) the cost of a given segment $r = \llbracket t_1, t_2 \rrbracket$ is given by minus the log-likelihood :
-$$ C_{t_1, t_2}^{(1)} =C_{(r)}^{(1)} = -\log\left(\sum_p \pi_p exp\left\{ - \frac{\sum_{i \in r} (x_i - \mu_p)^2 }{ 2 \sigma^2} \right\}\right)$$ 
-The optimal cost in $K$ segments from $r = \llbracket t_1, t_2 \rrbracket$ is defined as :
-$$C_{t_1, t_2}^{(K)} = C_{(r)}^{(K)} = \min_{m \in \mathcal{M}^{(K)}_{(r)}} \left\{ \sum_{r \in m} C^{(1)}_{(r)} \right\}.$$
-The corresponding  optimal segmentation is defined as :
-$$\widehat{m}_{t_1, t_2}^{(K)} = \widehat{m}_{(r)}^{(K)} = \underset{m \in \mathcal{M}^{(K)}_{(r)}}{\operatorname{argmin}} \left\{ \sum_{r \in m} C^{(1)}_{(r)} \right\}.$$
-The cost or loss of a segmentation is segment additive. Using this segment additivity one can built an $\Theta(Kn^2)$ dynamic programming algorithm to recover the best segmentations (in $1$ to $K$ segments).
- 
+A standard statistical model for segmentation is that $\forall i \in r_k$, $X_i\sim \mathcal{N}(\mu_k,\sigma^2)$. In the special case of array CGH, calling is performed by introducing additional (hidden) label variables $\{C(r_k)\}_k$ to cluster each segment into categories such as \texttt{deleted}, \texttt{normal}, \texttt{amplified} (not limited to 3 states). Then the segmentation/clustering model becomes  $\forall i \in r_k, X_i|\{C(r_k)=p\} \sim \mathcal{N}(\mu_p,\sigma^2)$, with $p=1,...,P$, $P$ being fixed.
 
-Here we propose to approximate this loss in a K-mean fashion
-More specifically we propose two possible approximations, the first is:
-\begin{eqnarray} \widetilde{C}_{(r)}^{(1)} \approx  \min_p \left\{ \sum_{i \in r}\frac{(x_i - \mu_p)^2} {2\sigma^2 }\right\}
-\label{equation:approximation2}\end{eqnarray} 
-and the second is 
-\begin{eqnarray} \widetilde{C}_{(r)}^{(1)} \approx  \min_p \left\{ \sum_{i \in r}\frac{(x_i - \mu_p)^2} {2\sigma^2 } + \log(\pi_p)\right\} .
-\label{equation:approximation1}\end{eqnarray} 
-In both cases, $\widetilde{C}_{(r)}^{(K)}$ and $\widetilde{m}_{(r)}^{(K)}$ are defined as:
-$$ \widetilde{C}_{(r)}^{(K)} =\min_{m \in \mathcal{M}^{(K)}_{(r)}} \left\{ \sum_{r \in m} \widetilde{C}^{(1)}_{(r)} \right\}, \qquad \text{and} \qquad
- \widetilde{m}_{(r)}^{(K)} = \underset{m \in \mathcal{M}^{(K)}_{(r)}}{\operatorname{argmin}} \left\{ \sum_{r \in m} \widetilde{C}^{(1)}_{(r)} \right\}.$$
+It is well known that the main algorithmic difficulty associated with segmentation models is not the estimation of the mean parameters ($\mu_k$s or $\mu_p$s depending on the model), but lies in the exact detertination of the boudaries of segments $\{\tau_k\}$. A well known solution to this problem is to use Dynamic Programming for a given number of segments $K$. Note that in this work, we do not deal with the statistical issue of model selection to estimate $K$ and $P$. We use appropriate model selection criteria that have already been published and discussed elsewhere.
 
+To perform Dynamic Programming, we need to define the ``unit'' cost of a generic segment $r = \llbracket t_1, t_2 \rrbracket$, whose cost function is given by minus the local log-likelihood calculated on $r$:
+$$ C_{t_1, t_2}^{(1)} =C_{(r)}^{(1)} = 
+\begin{cases}
+\sum_{i \in r} (x_i - \mu_r)^2/2 \sigma^2 \text{, for segmentation}  \\
+-\log\left(\sum_p \pi_p \exp \left\{ - \sum_{i \in r} (x_i - \mu_p)^2 / 2 \sigma^2 \right\}\right) \text{, for seg/clust}.\\
+\end{cases}
+$$ 
+In the case of segmentation/clustering, we propose to simplify the cost function by using a \textit{classification loss}, an approximation denoted by $\widetilde{C}_{(r)}^{(1)}$ which consists in focusing on the dominant term within the sum over $P$ exponentials:
+\begin{equation}
+\label{Eq:approx}
+\widetilde{C}_{(r)}^{(1)}= \min_p \left\{ \sum_{i \in r}\frac{(x_i - \mu_p)^2} {2\sigma^2 } + \log(\pi_p)\right\}.
+\end{equation}
 
-Importantly using $\widetilde{C}_{(r)}^{(1)}$ rather than  ${C}_{(r)}^{(1)}$ the set of canditate segmentations can be pruned efficently as in \cite{rigaill_2010}. 
-In our case given that the set of possible values for $\mu_p$ is finite we can even guarantee the time and space complexity of the algorithm to be $\Theta(KPn)$. 
-Furthermore, for the second approximation (given in equation \ref{equation:approximation1}) we can guarantee that the loss of the recovered segmentation $\widetilde{m}_{(r)}^{(K)}$ is at worth within $K \log(p)$ of the optimal segmentation $\widehat{m}_{(r)}^{(K)}$ (see Theorem \ref{theo:theoapprox}).
+Since the purpose is to find the global minimum of the cost function into $K$ segments, we also introduce the set of all segmentations of a given segment $r$ into $K$ segments such that $\mathcal{M}^{(K)}_{(r)} = \mathcal{M}^{(K)}_{t_1, t_2}$. Then the optimal cost of a segmentation of $r$ into $K$ segments and its associated optimal segmentation are defined as:
+$$
+C_{t_1, t_2}^{(K)} = C_{(r)}^{(K)} = \min_{m \in \mathcal{M}^{(K)}_{(r)}} \left\{ \sum_{r \in m} C^{(1)}_{(r)} \right\}, 
+\text{ and }
+\widehat{m}_{t_1, t_2}^{(K)} = \widehat{m}_{(r)}^{(K)} = \underset{m \in \mathcal{M}^{(K)}_{(r)}}{\operatorname{argmin}} \left\{ \sum_{r \in m} C^{(1)}_{(r)} \right\}.
+$$
+Similarly, we use notations 
+$$
+\widetilde{C}_{(r)}^{(K)} =\min_{m \in \mathcal{M}^{(K)}_{(r)}} \left\{ \sum_{r \in m} \widetilde{C}^{(1)}_{(r)} \right\}, \text{ and }
+\widetilde{m}_{(r)}^{(K)} = \underset{m \in \mathcal{M}^{(K)}_{(r)}}{\operatorname{argmin}} \left\{ \sum_{r \in m} \widetilde{C}^{(1)}_{(r)} \right\}
+$$
+when approximation (\ref{Eq:approx}) is used.\\
 
-%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%
-%%% STD DPA
-%%%%%%%%%%%%%%%%%%%%%%%
+When the cost or loss of a segmentation is segment additive (which is the case in both models), a $\mathcal{O}(Kn^2)$ Dynamic Programming algorithm can be built to recover the best exact segmentation (into $1$ to $K$ segments).
 
-\subsection{Original dynamic programming algorithm of seg-clust}
+\subsection{Original Dynamic Programming algorithm for segmentation}
 
-The cost of a given segmentation is the sum of the cost of its segments. 
+A basic statement is that the cost of a given segmentation is the sum of the cost of its segments. 
 Thus the Bellman optimality principal holds and we have:
-$ C_{1, t}^{(k+1)} = min_{\tau \leq t} \{ C_{1, \tau -1}^{(k)}  + C_{\tau, t}^{(1)} \} .$
+$ C_{1, t}^{(k+1)} = \min_{\tau \leq t} \{ C_{1, \tau -1}^{(k)}  + C_{\tau, t}^{(1)} \} .$
 %More generally for any $k_1 (>0)$ and $k_2 (> 0)$   we have
 %$$ C_{1, t}^{(k_1 + k_2)} = min_{\tau \leq t} \{ C_{1, \tau -1}^{(k_1)}  + C_{\tau, t}^{(k_2)} \} $$
 Using this update rule  a Dynamic Programming algorithm can be built to recover all $ C_{1, t}^{(k+1)}$ for all $t \leq n$ and $k \leq K$.
-This can be done using algorithm \ref{algo:DPA2} for instance. 
+This can be done using Algorithm \ref{algo:DPA2} for instance. 
 For simplicity we did not include the initialization of all $C^{(1)}_{1,t}$ for $t \leq n$ and of all $C^{(k)}_{1,t}$ for $k \leq K$ and $t < k$.
 All $C^{(k)}_{1,t}$ are initialized as $+\infty$ and $C^{(1)}_{1,t}$ are initialized using their definition.
-This algorithm assumes that all $C_{i, j}$ have been pre-computed and stored (in 
-a $n$ by $n$ matrix) or that they can be efficiently computed on the fly, which is the case for the mixture model loss of seg-clust and the two K-mean approximations proposed in equation \ref{equation:approximation1} and \ref{equation:approximation2}. 
-At step $k, t$ of algorithm \ref{algo:DPA2}  $\Theta(t)$ basic operations are performed. 
-If we sum these for all $k < K$ and $t < n$  we see that the algorithm has an $\Theta(Kn^2)$ time complexity. 
-
+This algorithm assumes that all $C_{t_1, t_2}^{(1)}$ have been pre-computed and stored (in 
+a $n$ by $n$ matrix) or that they can be efficiently computed on the fly, which is the case for every models we consider here. At step $k, t$ of Algorithm \ref{algo:DPA2}  $\mathcal{O}(t)$ basic operations are performed. If we sum these for all $k < K$ and $t < n$  we see that the algorithm has a $\mathcal{O}(Kn^2)$ time complexity. 
 
 \begin{algorithm}
-  \caption{Old DP algorithm}\label{algo:DPA2}
+  \caption{Standard Dynamic Programming algorithm}\label{algo:DPA2}
   \begin{algorithmic}
     \State \textbf{Input}: $X_i$ a sequence of $n$ data-points, $K$ an integer
     \State \textbf{Output}: $C^{(k)}_{1,t}$ in $\mathbb{R}$ for all $k \leq K$ and $t \leq n$
@@ -143,32 +135,20 @@ If we sum these for all $k < K$ and $t < n$  we see that the algorithm has an $\
   \end{algorithmic}
 \end{algorithm}
 
+\subsection{A linear Dynamic Programming Algorithm for the classification loss}
 
+An important consequence of using the classification loss $\widetilde{C}_{(r)}^{(1)}$ rather than ${C}_{(r)}^{(1)}$ is that the set of canditate segmentations 
+can be pruned efficently \cite{rigaill_2010}. In our case given that the set of possible values for $\mu_p$ is finite we can even guarantee the time and space complexity of the algorithm to be $\mathcal{}(KPn)$. 
+Furthermore, we can also guarantee that the loss of the recovered segmentation $\widetilde{m}_{(r)}^{(K)}$ is at worth within $K \log(p)$ of the optimal segmentation $\widehat{m}_{(r)}^{(K)}$ (see Theorem \ref{theo:theoapprox}). \\
 
+Before we describe the algorithm we need to define some new notations. We define the approximate cost of a segment knowing its mean $\mu$ as 
+$$ \widetilde{C}_{(r)}^{(1)}   (\mu) = \left\{ \frac{\sum_{i \in r} (x_i - \mu)^2  } {2 \sigma^2 } - \log(\pi_p) \right\}.$$
+Using this notation we can rewrite the classification loss of a segment $r = \llbracket t_1, t_2 \rrbracket$ as $\widetilde{C}_{t_1, t_2}^{(1)}  = \min_p \{  \widetilde{C}_{t_1, t_2}^{(1)}  (\mu_p) \},$ with $\widetilde{C}_{t_1, t_2}^{(1)}  (\mu)$ being point additive in the sense that $\widetilde{C}_{t_1, t_2}^{(1)}  (\mu) = \underset{ t_1 \leq t \leq t_2}{\sum} \widetilde{C}_{t, t}^{(1)}  (\mu).$ Then we define the cost of the best segmentation knowing that the mean of the last segment is $\mu$ as :
+$$\widetilde{C}_{1, t}^{(K)}(\mu) = \underset{{m \in \mathcal{M}^{(K)}_{(1, t)}}}{\min} \left\{ \sum_{k < K-1}  \widetilde{C}^{(1)}_{(r_k)}  + \widetilde{C}^{(1)}_{(r_K)}(\mu) \right\}.$$
+Using this notation we get that $ \widetilde{C}_{1, t}^{(k)}  = \underset{p < P}{\min} \left\{ \widetilde{C}_{1, t}^{(k)}(\mu_p) \right\}$, and if we know every $C_{1, t}^{(k)}(\mu_p)$ at step $t$ for all $p< P$, we straightfowardly get $C_{1, t}^{(k)}$ in $\mathcal{O}(p)$.
 
-\subsection{A linear DP for the classification loss}
-
-Before we describe the algorithm we need to define some new notations.
-We define the approximate cost of a segment knowing its mean $\mu$ as either :
-$$ \widetilde{C}_{(r)}^{(1)}  (\mu) = \left\{ \frac{\sum_{i \in r} (x_i - \mu)^2  }{ 2 \sigma^2} \right\}, 
-\quad \text{or} \quad 
- \widetilde{C}_{(r)}^{(1)}   (\mu) = \left\{ \frac{\sum_{i \in r} (x_i - \mu)^2  } {2 \sigma^2 } - \log(\pi_p) \right\},$$
-corresponding to the approximation given in equation \ref{equation:approximation2} and \ref{equation:approximation1} respectively.
-Using this notation we can rewrite the approximated loss of a segment $r = \llbracket t_1, t_2 \rrbracket$ as:
-$ \widetilde{C}_{t_1, t_2}^{(1)}  = min_p \{  \widetilde{C}_{t_1, t_2}^{(1)}  (\mu_p) \}.$
-$\widetilde{C}_{t_1, t_2}^{(1)}  (\mu)$ is point additive in the sense that 
-$\widetilde{C}_{t_1, t_2}^{(1)}  (\mu) = \underset{ t_1 \leq t \leq t_2}{\sum} \widetilde{C}_{t, t}^{(1)}  (\mu).$
-
-We define the cost of the best segmentation knowing that the mean of the last segment is $\mu$ as :
-$ \widetilde{C}_{1, t}^{(K)}(\mu) = \underset{{m \in \mathcal{M}^{(K)}_{(1, t)}}}{\min} \left\{ \sum_{k < K-1}  \widetilde{C}^{(1)}_{(r_k)}  + \widetilde{C}^{(1)}_{(r_K)}(\mu) \right\}.$
-Using this notation we get that
-$ \widetilde{C}_{1, t}^{(k)}  = \underset{p < P}{\min} \left\{ \widetilde{C}_{1, t}^{(k)}(\mu_p) \right\}$
-Using this equation, if we know all $C_{1, t}^{(k)}(\mu_p)$ at step $t$ for all $p < P$ we straightfowardly get $C_{1, t}^{(k)}$ in $\Theta(p)$.
-
-
-As $\widetilde{C}_{t_1, t_2} (\mu)$ is point additive the set of potential candidate segmentation can be pruned efficiently as described
-in \cite{rigaill_2010}. 
-As the set of $\mu_p$ is finite the pruning step is further simplified and can be done using the following theorem.
+As $\widetilde{C}_{t_1, t_2} (\mu)$ is point additive the set of potential candidate segmentations can be pruned efficiently as already described \cite{rigaill_2010}. Moreover the set of $\mu_p$ being finite, the 
+pruning step is further simplified and can be done using the following theorem.
 
 \begin{theo}
 $ \widetilde{C}_{1, t+1}^{(k)}(\mu) = \min \left\{ \widetilde{C}_{1, t}^{(k)}(\mu),  \widetilde{C}_{1, t}^{(k-1)} \right\} +  \widetilde{C}_{t+1, t+1}^{(1)}(\mu) $
@@ -181,33 +161,18 @@ From this and using the point additivness of $ C_{(\tau+1, t+1)}^{(1)}(\mu)$ we 
 \begin{eqnarray*}
  \widetilde{C}_{1, t+1}^{(k)}(\mu) = & \min \left\{ \ \underset{{\tau < t}}{\min} \left(  \widetilde{C}_{(1,\tau)}^{(k-1)}  +  \widetilde{C}_{(\tau+1, t)}^{(1)}(\mu) \right), \quad  \widetilde{C}_{(1,t)}^{(k-1)}  \right\} +  \ \widetilde{C}_{(t+1, t+1)}^{(1)}(\mu).
 \end{eqnarray*}
+\noindent From this the theorem follows. $\blacksquare$ \\
 
-
-%We also have that for all $\tau, \tau' \leq t$ such that
-%$$  \widetilde{C}_{(1,\tau)}^{(k)}  +  \widetilde{C}_{(\tau+1, t)}^{(1)}(\mu) \leq  \widetilde{C}_{(1,\tau')}^{(k)}  +  \widetilde{C}_{(\tau'+1, t)}^{(1)}(\mu) $$
-% then for any $t' > t$ we have :
-%$$  \widetilde{C}_{(1,\tau)}^{(k)}  +  \widetilde{C}_{(\tau+1, t)}^{(1)}(\mu) + \widetilde{C}_{(t+1, t')}^{(1)} \leq  \widetilde{C}_{(1,\tau')}^{(k)}  +  \widetilde{C}_{(\tau'+1, t)}^{(1)}(\mu)  + \widetilde{C}_{(t+1, t')}^{(1)}. $$
-%Thus we get that $\forall \tau < t $ : 
-%$$  \widetilde{C}_{1, t}^{(k)}(\mu) + \widetilde{C}_{(t+1, t+1)}^{(1)} \leq  \widetilde{C}_{(1,\tau)}^{(k)} + \widetilde{C}_{(\tau+1, t+1)}^{(1)}(\mu).$$
-%Thus 
-%$$ \min_{\tau < t} \left(  \widetilde{C}_{(1,\tau)}^{k-1}  +  \widetilde{C}_{(\tau+1, t)}^{(1)}(\mu) \right) $$
-From this the theorem follows $\blacksquare$
-
-Using this theorem, knowing $C_{1, t}^{(k)}(\mu)$ and $C_{1, t}^{(k-1)}$ we get $C_{1, t+1}^{(k)}(\mu)$ in $\Theta(1)$
+Using this theorem, knowing $C_{1, t}^{(k)}(\mu)$ and $C_{1, t}^{(k-1)}$ we get $C_{1, t+1}^{(k)}(\mu)$ in $\mathcal{O}(1)$
 and we derive algorithm \ref{algo:DPALinear} for the DP step of the DP-EM.
 For simplicity we did not include the initialization of $C^{(1)}_{1,t}$ for $t < n$ and $C^{(k)}_{1,1}(\mu_p)$.
 All $C^{(k)}_{1,1}(\mu_p)$ are initialized as $+\infty$ and $C^{(1)}_{1,t}$ are initialized using their definition.
 
 
-At step $k, t$ of algorithm \ref{algo:DPALinear}  $\Theta(P)$ basic operations are performed. 
-If we sum these for all $k < K$ and $t < n$  we straighfowardly see that the algorithm has an $\Theta(KPn)$ time complexity.
-
-
-
-
+At step $k, t$ of Algorithm \ref{algo:DPALinear}  $\mathcal{O}(P)$ basic operations are performed. If we sum these for all $k < K$ and $t < n$  we straighfowardly see that the algorithm has an $\mathcal{O}(KPn)$ time complexity.
 \begin{algorithm}
 \begin{algorithmic}
-\caption{Linear DP K-mean loss}\label{algo:DPALinear}
+\caption{Linear Dynamic Programming algorithm for the classification loss}\label{algo:DPALinear}
 
 
 
@@ -238,12 +203,10 @@ If we sum these for all $k < K$ and $t < n$  we straighfowardly see that the alg
   \end{algorithmic}
 \end{algorithm}
 
-
-
 \subsection{A bound on the quality of the approximation }
-Using the apprixmation defined in equation \ref{equation:approximation1} we can guarante the quality of the obtained segmentation using the following theorem.
+Using the approximation defined in Equation \ref{Eq:approx} we can guarantee the quality of the obtained segmentation using the following theorem.
 \begin{theo}
-Using apprixmation defined in equation \ref{equation:approximation1} we have for all segment $R$ and $K$
+Using approximation defined in Equation \ref{Eq:approx} we have for all segments $R$ and $K$
 $$ \widetilde{C}_{(R)}^{(K)} - K \log(p) 
 \ \leq \ 
 \underset{r \in \widehat{m}_{(R)}^{(K)}}{\operatorname{\sum}} \widetilde{C}_{(R)}^{(K)} - K \log(p) 
@@ -258,19 +221,17 @@ $$ \widetilde{C}_{(R)}^{(K)} - K \log(p)
 
 \paragraph{Proof.} 
 We can always write:
-$$ {C}_{(r)}^{(1)} = \widetilde{C}_{(r)}^{(1)} - \log\left(\sum_p \frac{\pi_p exp\{ - \frac{\sum_{i \in r} (x_i - \mu_p)^2 }{ 2 \sigma^2} \}}{exp\{-\widetilde{C}_{(r)}^{(1)}\}}\right)$$
+$$ {C}_{(r)}^{(1)} = \widetilde{C}_{(r)}^{(1)} - \log\left(\sum_p \pi_p \exp \left\{ -\frac{\sum_{i \in r} (x_i - \mu_p)^2 }{ 2 \sigma^2} +\widetilde{C}_{(r)}^{(1)} \right\}\right)$$
 Moreover we have :
 $$-\log(p) \ \leq \ 
-- \log\left(\sum_p \frac{\pi_p exp\{ - \frac{\sum_{i \in r} (x_i - \mu_p)^2 }{ 2 \sigma^2} \}}{exp\{-\widetilde{C}_{(r)}^{(1)}\}}\right) 
+- \log\left(\sum_p \pi_p \exp \left\{ -\frac{\sum_{i \in r} (x_i - \mu_p)^2 }{ 2 \sigma^2} +\widetilde{C}_{(r)}^{(1)} \right\}\right)
 \ \leq \  
 0$$
 Thus we have :
 \begin{eqnarray}
-\forall r,  \quad \widetilde{C}_{(r)}^{(1)} -\log(p) \leq {C}_{(r)}^{(1)} \leq \widetilde{C}_{(r)}^{(1)} \label{equation:bound1}
+\forall r,  \quad \widetilde{C}_{(r)}^{(1)} -\log(p) \leq {C}_{(r)}^{(1)} \leq \widetilde{C}_{(r)}^{(1)} \label{equation:bound1}.
 \end{eqnarray}
-
-Using equation \ref{equation:bound1} and the definition of ${C}_{(R)}^{(K)}$
-we get that, 
+Using Equation (\ref{equation:bound1}) and the definition of ${C}_{(R)}^{(K)}$ we get that, 
 \begin{eqnarray} 
 \forall m \in \mathcal{M}^{(K)}_{(R)}, \qquad
 \widetilde{C}_{(R)}^{(K)} - K\log(p) \leq \sum_{r \in m} \widetilde{C}_{(r)}^{(1)} - K \log(p) \leq   \sum_{r \in m} {C}_{(r)}^{(1)} .
@@ -281,10 +242,30 @@ Similarly we get :
 {C}_{(R)}^{(K)} \leq \sum_{r \in m} {C}_{(r)}^{(1)} \leq   \sum_{r \in m} \widetilde{C}_{(r)}^{(1)} .
 \label{equation:boundproof2}\end{eqnarray}
 
-Applying equation \ref{equation:boundproof1} to $m = \widehat{m}_{t_1, t_2}^{(K)}$ and then equation \ref{equation:boundproof2}
-to $m =  \widetilde{m}_{t_1, t_2}^{(K)}$ we get the theorem $\blacksquare$
+Applying Equation (\ref{equation:boundproof1}) to $m = \widehat{m}_{t_1, t_2}^{(K)}$ and then Equation (\ref{equation:boundproof2})
+to $m =  \widetilde{m}_{t_1, t_2}^{(K)}$ we get the theorem. $\blacksquare$
+
+\section{Joint Segmentation and Parallelization of the algorithm}
 
 
+
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{|c|rr|rr|rr|rr|}
+  \hline
+SNR  &  $CI_{new}(\hat{K})$ & $CI_{old}(\hat{K})$ & $CI_{new}(\hat{\mu})$ & $CI_{old}(\hat{\mu})$ & $CI_{new}(FDR)$ & $CI_{old}(FDR)$   
+     & $CI_{new}(FNR)$ & $CI_{old}(FNR)$  \\
+  \hline
+  1   & [0.90 ; 1.02] & [0.90 ; 1.02] & [0.14 ; 0.16] & [0.14 ; 0.17] & [0.42 ; 0.45] & [0.42 ; 0.45] & [0.59 ; 0.62] & [0.59 ; 0.62] \\ 
+  5   & [0.36 ; 0.44] & [0.37 ; 0.45] & [0.05 ; 0.06] & [0.05 ; 0.06] & [0.15 ; 0.20] & [0.17 ; 0.22] & [0.21 ; 0.26] & [0.23 ; 0.28] \\ 
+  10  & [0.22 ; 0.30] & [0.23 ; 0.30] & [0.03 ; 0.03] & [0.03 ; 0.03] & [0.06 ; 0.10] & [0.07 ; 0.11] & [0.08 ; 0.14] & [0.09 ; 0.14] \\ 
+  15  & [0.17 ; 0.22] & [0.17 ; 0.23] & [0.02 ; 0.02] & [0.02 ; 0.02] & [0.02 ; 0.06] & [0.03 ; 0.07] & [0.03 ; 0.08] & [0.03 ; 0.09] \\ 
+  20  & [0.15 ; 0.20] & [0.15 ; 0.21] & [0.01 ; 0.02] & [0.01 ; 0.02] & [0.01 ; 0.05] & [0.01 ; 0.05] & [0.01 ; 0.06] & [0.01 ; 0.07] \\ 
+   \hline
+\end{tabular}
+\end{center}
+\caption{Performance comparison between the non parallel (``old'') and the parallel (``new'') version. Confidence intervals are given over 50 replicates for each simulated configuration. Statistical performance is assessed through the precision of the estimation of the number of segments $\hat{K}$, the precision of the estimators of the mean level of each segment ($\hat{\mu}$), the False Discovery and False Negative Rates for breakpoint detection.} 
+\end{table}
 
 \subsection{The R package \esoft (or Implementation)}
 All the presented algorithms are available into the \texttt{R} package \soft, with all the computationaly intensive sections implemented in \texttt{C++}.
@@ -337,8 +318,49 @@ Endly, since the only amount of required memory corresponds to the profiles that
     \label{tabtime}
   \end{center}
 \end{table}
+
 \bibliographystyle{plain}
 \bibliography{biblio}
 
 
 \end{document}
+
+
+\section{Linearized Dynamic Programming to segment individual profiles}
+\subsection{Background / Notations}
+We consider a signal of length $n$, $\{X_i\}_{i \leq n}$ with $X_i \in \mathbf{R}$.
+A segment $r$ is delimited by two change-points and is denoted
+ $r = \llbracket t_1, t_2 \rrbracket$.
+We define the set of all segmentations of a segment $r$ in $K$ segments as $\mathcal{M}^{(K)}_{(r)} = \mathcal{M}^{(K)}_{t_1, t_2}$.
+The $k$-th change of segmentation $m$ in $K$ segments will be denoted by $\tau_k$ with the convention that $\tau_0 = 1$ and $\tau_K = n+1$.
+The $k-th$ segment is denoted by $r_k$.
+For a given segmentation in $K$ segments we have, $m = \{r_1, r_2 \ldots, r_K\}$ and for all $k \leq K$,  $r_k = \llbracket \tau_k, \tau_{k+1} -1\rrbracket$.
+
+Using the notations of seg-clust (\cite{picard_2007}) the cost of a given segment $r = \llbracket t_1, t_2 \rrbracket$ is given by minus the log-likelihood :
+$$ C_{t_1, t_2}^{(1)} =C_{(r)}^{(1)} = -\log\left(\sum_p \pi_p exp\left\{ - \frac{\sum_{i \in r} (x_i - \mu_p)^2 }{ 2 \sigma^2} \right\}\right)$$ 
+The optimal cost in $K$ segments from $r = \llbracket t_1, t_2 \rrbracket$ is defined as :
+$$C_{t_1, t_2}^{(K)} = C_{(r)}^{(K)} = \min_{m \in \mathcal{M}^{(K)}_{(r)}} \left\{ \sum_{r \in m} C^{(1)}_{(r)} \right\}.$$
+The corresponding  optimal segmentation is defined as :
+$$\widehat{m}_{t_1, t_2}^{(K)} = \widehat{m}_{(r)}^{(K)} = \underset{m \in \mathcal{M}^{(K)}_{(r)}}{\operatorname{argmin}} \left\{ \sum_{r \in m} C^{(1)}_{(r)} \right\}.$$
+The cost or loss of a segmentation is segment additive. Using this segment additivity one can built an $\Theta(Kn^2)$ dynamic programming algorithm to recover the best segmentations (in $1$ to $K$ segments).
+
+Here we propose to approximate this loss in a K-mean fashion
+More specifically we propose two possible approximations, the first is:
+\begin{eqnarray} \widetilde{C}_{(r)}^{(1)} \approx  \min_p \left\{ \sum_{i \in r}\frac{(x_i - \mu_p)^2} {2\sigma^2 }\right\}
+\label{equation:approximation2}\end{eqnarray} 
+and the second is 
+\begin{eqnarray} \widetilde{C}_{(r)}^{(1)} \approx  \min_p \left\{ \sum_{i \in r}\frac{(x_i - \mu_p)^2} {2\sigma^2 } + \log(\pi_p)\right\} .
+\label{equation:approximation1}\end{eqnarray} 
+In both cases, $\widetilde{C}_{(r)}^{(K)}$ and $\widetilde{m}_{(r)}^{(K)}$ are defined as:
+$$ \widetilde{C}_{(r)}^{(K)} =\min_{m \in \mathcal{M}^{(K)}_{(r)}} \left\{ \sum_{r \in m} \widetilde{C}^{(1)}_{(r)} \right\}, \qquad \text{and} \qquad
+ \widetilde{m}_{(r)}^{(K)} = \underset{m \in \mathcal{M}^{(K)}_{(r)}}{\operatorname{argmin}} \left\{ \sum_{r \in m} \widetilde{C}^{(1)}_{(r)} \right\}.$$
+
+
+%We also have that for all $\tau, \tau' \leq t$ such that
+%$$  \widetilde{C}_{(1,\tau)}^{(k)}  +  \widetilde{C}_{(\tau+1, t)}^{(1)}(\mu) \leq  \widetilde{C}_{(1,\tau')}^{(k)}  +  \widetilde{C}_{(\tau'+1, t)}^{(1)}(\mu) $$
+% then for any $t' > t$ we have :
+%$$  \widetilde{C}_{(1,\tau)}^{(k)}  +  \widetilde{C}_{(\tau+1, t)}^{(1)}(\mu) + \widetilde{C}_{(t+1, t')}^{(1)} \leq  \widetilde{C}_{(1,\tau')}^{(k)}  +  \widetilde{C}_{(\tau'+1, t)}^{(1)}(\mu)  + \widetilde{C}_{(t+1, t')}^{(1)}. $$
+%Thus we get that $\forall \tau < t $ : 
+%$$  \widetilde{C}_{1, t}^{(k)}(\mu) + \widetilde{C}_{(t+1, t+1)}^{(1)} \leq  \widetilde{C}_{(1,\tau)}^{(k)} + \widetilde{C}_{(\tau+1, t+1)}^{(1)}(\mu).$$
+%Thus 
+%$$ \min_{\tau < t} \left(  \widetilde{C}_{(1,\tau)}^{k-1}  +  \widetilde{C}_{(\tau+1, t)}^{(1)}(\mu) \right) $$
