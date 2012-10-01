@@ -23,8 +23,8 @@
 
 %\newfloat{Algorithm}{thp}{lop}
 %\floatname{Algorithm}{Algorithm}
-%\newtheorem{de}{Definition}[subsection] % les dÃ©finitions et les thÃ©orÃ©mes sont
-\newtheorem{theo}{Theorem}[section]    % numÃ©rotÃ©s par section
+%\newtheorem{de}{Definition}[subsection] % les dÃÂ©finitions et les thÃÂ©orÃÂ©mes sont
+\newtheorem{theo}{Theorem}[section]    % numÃÂ©rotÃÂ©s par section
 \newtheorem{lem}[theo]{Lemma}
 %\newtheorem{cor}[theo]{Corrolary}
 %\newtheorem{prop}[theo]{Proposition}
@@ -59,7 +59,7 @@ Laboratoire de Biom\'etrie et Biologie Evolutive, UMR CNRS 5558 Universit\'{e} L
 \maketitle   
 
 \begin{abstract}
-\esoft is fast enough to segment more than 1,000 profiles of length 100,000 in less than ? hours (or less than an afternoon).
+The method comes with a {\it next generation} \texttt{R} package, called \soft, which is fast enough to segment more than 1,000 profiles of length 100,000 in less than one afternoon.
 
 \keywords{}
 \end{abstract}
@@ -280,23 +280,22 @@ Compilation and installation are compliant with the \texttt{R} standard procedur
 \subsection{Computationnal footprint and scalability (or \esoft is efficient and scalable in practice)}
 
 The software design take advantage of multiprocessing to treat the profiles in parallel at every step of the algorithm.
-To assess the quality of the parallel implementation, we developped a simulation scheme to analyze the \esoft execution time 
+To assess the quality of the parallel implementation, we developed a simulation scheme to analyze the \esoft execution time 
 with varying number of profiles and number of available CPU units (cores).
-We simulated $256, 512$ and $1024$ profiles of length $20,000$ with k.mean=10,SNR=5,lambda=10 and we run cghseg on $1,2,4,8,16,32,48$ cores Opteron 2.2 GHz.
-We observed a practical scalability (see Fig.\ref{figspeedup}) consistent with the expected speedup...
-Moreover, we remarked that the remaing sequential parts remains negligible due to the dynamic programming efficiency... in respect to the Amdahl's law[ref].
+We simulated $256, 512$ and $1024$ profiles of length $20,000$ with k.mean=10,SNR=5,lambda=10 and we ran \esoft on up to $48$ cores.
+We observed a relative speedup decrease (see Fig.\ref{figspeedup}) with the number of cores and profiles. Indeed, the lower is the number of profiles the less time consuming are the sequential parts compared with the parallel parts. Meanwhile, when the datasets comes large in the number of profiles, the speedup better follows the Amdahl's law that predicts the theoretical maximum speedup (see dashed lines Fig.\ref{figspeedup}): indeed the Amdahl's law established that the speedup follow $1/(alpha+(1-alpha)/p)$ where.... We deduced that some overhead due to the mechanisms that launch the parallel sections (mainly in the \texttt{R} package \texttt{parallel}) comes to be less negligible when the datasets are not large enough, but also that the quality of the implementation is therefore demonstrated especially for large datasets.
 
 While the main interest of \esoft is the quality of its results, the associated computational expense is affordable even
-for very large datasets. As a benchmark, we simulated datasets with $1024$ profiles of length $100,000$ with k.mean=10,SNR=5,lambda=10. 
-\esoft required about ??? minutes of calculation on average, corresponding to less than ?? hours elapsed time on $48$ cores Opteron 2.2 GHz (see Table \ref{tabtime}).
-
-Notice that we ran 5 times each simulation and averaged the results. 
-Endly, since the only amount of required memory corresponds to the profiles that are accessed threw the shared memory, the memory needs are reasonnable and order of magnitude....  (des chiffres)
+for very large datasets. As a benchmark, we simulated datasets with $1024$ profiles of length $100,000$ with k.mean=10,SNR=5,lambda=10. This corresponds to the up-tu-date limits of the available datasets??? 
+\esoft required $453$ minutes of calculation on average, corresponding to about $4$ hours elapsed time on a $48$ cores (see Table \ref{tabtime}).
+In addition, due to the {\it copy-on-write} mechanism (ref?) of the \texttt{R} package \texttt{parallel} that avoid memory copy between processes, and thanks to the shared memory efficiency assessed with \texttt{openMP}, the memory needs are reasonnable (see Table \ref{tabtime}). Indeed, the only amount of required memory mainly corresponds to the profile dataset.
+Therefore, our method and software package are adapated to the next generation of computers (many cores) and experiments (large profiles).
 
 \begin{figure}[h!]
   \begin{center}
-    \includegraphics[height=6.5cm]{figures/speedup}
-    \caption{Speedup}
+    \includegraphics[height=10cm]{figures/speedup}
+    \caption{Speedup.
+Notice that we ran 5 times each simulation and averaged the results.}
     \label{figspeedup}
   \end{center}
 \end{figure}
@@ -310,11 +309,13 @@ Endly, since the only amount of required memory corresponds to the profiles that
       Length of the profiles &  \multicolumn{3}{c}{$20,000$} & \multicolumn{3}{c}{$100,000$} \\
       Number of profiles & 256 & 512 & 1024 & 256 & 512 & 1024\\
       \hline
-      Average CPU time (min) & 10 & 10 & 10 & 10 & 10 & 10 \\
+      Average CPU time (min) & 6 & 15 & 54     & 31 & 70 & 253 \\
+      Memory usage (Gb)      & 0.4 & 0.8 & 1.8    &  1.7 & 3.7 & 7.9 \\
       \hline
     \end{tabular}
     %}
-    \caption{Average performance of . on $48$ cores Opteron 2.2 GHz + memory}
+    \caption{Average performance of . on $48$ cores (quadri-12 cores Opteron 2.2 GHz + memory
+Notice that we ran 5 times each simulation and averaged the results.}
     \label{tabtime}
   \end{center}
 \end{table}
