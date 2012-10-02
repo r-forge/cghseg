@@ -73,12 +73,12 @@ Segmenting heterogeneous signals into regions of common characteristics is often
 
 The purpose of segmentation is to partition a signal of $n$ observations $\{Y(t)\}$ into $K$ segments of homogeneous distributional parameter. In this section we deal with the univariate segmentation of one array CGH profile, the case of Joint multivariate segmentation being considered in Section 3. In the following a segment is an interval delimited by two change-points $\tau_k, \tau_{k+1}$ for instance,  with convention $\tau_0 = 1$ and $\tau_K = n+1$, and notation $r_k=\llbracket \tau_k, \tau_{k+1} -1\rrbracket$ stands for segment $k$. A segmentation in $K$ segments is denoted by $m^{(K)} = \{r_1, r_2 \ldots, r_K\}$.
 
-A standard statistical model for segmentation is the detection of changes in the mean of a signal, such that $$\forall t \in r_k, \,\, Y(t)\sim \mathcal{N}(\mu_k,\sigma^2).$$ In the special case of array CGH, an additional step is the ``calling step'' that is performed by introducing additional (hidden) label variables $\{C(r_k)\}_k$ to cluster each segment into categories such as \texttt{deleted}, \texttt{normal}, \texttt{amplified} (not limited to 3 states). Then the segmentation/clustering model becomes  $$\forall t \in r_k, \,\, Y(t)|\{C(r_k)=p\} \sim \mathcal{N}(\mu_p,\sigma^2),$$ with $p=1,...,P$, $P$ being fixed.
+A standard statistical model for segmentation is the detection of changes in the mean of a signal, such that $\forall t \in r_k, \,\, Y(t)\sim \mathcal{N}(\mu_k,\sigma^2).$ In the special case of array CGH, an additional step is the ``calling step'' that is performed by introducing additional (hidden) label variables $\{C(r_k)\}_k$ to cluster each segment into categories such as \texttt{deleted}, \texttt{normal}, \texttt{amplified} (not limited to 3 states). Then the segmentation/clustering model becomes (for fixed $P$ and $p=1,...P$)  $$\forall t \in r_k, \,\, Y(t)|\{C(r_k)=p\} \sim \mathcal{N}(\mu_p,\sigma^2).$$
 
-Once the statistical model has been defined, the main algorithmic challenge lies in the exact detertination of the boundaries of segments $\{\tau_k\}$ (and not in the estimation of mean parameters $\mu_k$s or $\mu_p$s depending on the model). A well known solution to this problem is to use Dynamic Programming for a given number of segments $K$. Note that in this work, we do not deal with the statistical issue of model selection to estimate $K$ and $P$. We use appropriate model selection criteria that have already been published and discussed elsewhere.
+Once the statistical model has been defined, the main algorithmic challenge lies in the exact detertination of the boundaries of segments $\{\tau_k\}$ (and not in the estimation of mean parameters $\mu_k$s or $\mu_p$s depending on the model). A well known solution to this problem is to use Dynamic Programming for a given number of segments $K$. Note that in this work, we do not deal with the statistical issue of model selection to estimate $K$ and $P$. We use appropriate model selection criteria that have already been published and discussed elsewhere \cite{picard_statistical_2005,ZS07}.
 
-To perform Dynamic Programming, we need to define the ``unit'' cost of a generic segment $r = \llbracket t_1, t_2 \rrbracket$, whose cost function is given by minus the local log-likelihood calculated on $r$:
-$$ C_{t_1, t_2}^{(1)} =C_{(r)}^{(1)} = 
+To perform Dynamic Programming, we need to define the ``unit'' cost of a generic segment $r = \llbracket t_1, t_2 \rrbracket$, which is given by minus the local log-likelihood calculated on $r$:
+$$ C_{(r)}^{(1)} = 
 \begin{cases}
 \sum_{t \in r} (y(t) - \mu_r)^2/2 \sigma^2 \text{, for segmentation in the mean}  \\
 -\log\left(\sum_p \pi_p \exp \left\{ - \sum_{t \in r} (y(t) - \mu_p)^2 / 2 \sigma^2 \right\}\right) \text{, for seg/clust}.
@@ -86,7 +86,7 @@ $$ C_{t_1, t_2}^{(1)} =C_{(r)}^{(1)} =
 $$ 
 A main difference between the two models lies in the estimation of the mean parameters. In the case of segmentation in the mean, parameters $\{\mu_k\}_k$ can be estimated directly by the empirical means of segments while computing the position of the breaks. In the case of segmentation/clustering, parameters $\{\mu_p\}_p$ are common across segments. Consequently, they are fixed while computing breakpoint coordinates, and they are estimated iteratively by using an EM-algorithm, leading to a DP-EM algorithm \cite{picard_2007}. 
 
-In the case of segmentation/clustering, we propose to simplify the cost function by using a \textit{classification loss}, an approximation denoted by $\widetilde{C}_{(r)}^{(1)}$ which consists in focusing on the dominant term within the sum over $P$ exponentials:
+In the case of segmentation/clustering, we propose to simplify the cost function by using a \textit{classification cost function}, an approximation denoted by $\widetilde{C}_{(r)}^{(1)}$ which consists in focusing on the dominant term within the sum over $P$ exponentials:
 \begin{equation}
 \label{Eq:approx}
 \widetilde{C}_{(r)}^{(1)}= \min_p \left\{ \sum_{t \in r}\frac{(y(t) - \mu_p)^2} {2\sigma^2 } + \log(\pi_p)\right\}.
@@ -94,18 +94,14 @@ In the case of segmentation/clustering, we propose to simplify the cost function
 
 Since the purpose is to find the global minimum of the total cost function into $K$ segments, we also introduce the set of all segmentations of a given segment $r$ into $K$ segments such that $\mathcal{M}^{(K)}_{(r)} = \mathcal{M}^{(K)}_{t_1, t_2}$. Then the optimal cost of a segmentation of $r$ into $K$ segments and its associated optimal segmentation are defined as:
 $$
-C_{t_1, t_2}^{(K)} = C_{(r)}^{(K)} = \min_{m \in \mathcal{M}^{(K)}_{(r)}} \left\{ \sum_{r \in m} C^{(1)}_{(r)} \right\}, 
+C_{(r)}^{(K)} = \min_{m \in \mathcal{M}^{(K)}_{(r)}} \left\{ \sum_{r \in m} C^{(1)}_{(r)} \right\}, 
 \text{ and }
-\widehat{m}_{t_1, t_2}^{(K)} = \widehat{m}_{(r)}^{(K)} = \underset{m \in \mathcal{M}^{(K)}_{(r)}}{\operatorname{argmin}} \left\{ \sum_{r \in m} C^{(1)}_{(r)} \right\}.
+\widehat{m}_{(r)}^{(K)} = \underset{m \in \mathcal{M}^{(K)}_{(r)}}{\operatorname{argmin}} \left\{ \sum_{r \in m} C^{(1)}_{(r)} \right\}.
 $$
-Similarly, we use notations 
-$$
-\widetilde{C}_{(r)}^{(K)} =\min_{m \in \mathcal{M}^{(K)}_{(r)}} \left\{ \sum_{r \in m} \widetilde{C}^{(1)}_{(r)} \right\}, \text{ and }
-\widetilde{m}_{(r)}^{(K)} = \underset{m \in \mathcal{M}^{(K)}_{(r)}}{\operatorname{argmin}} \left\{ \sum_{r \in m} \widetilde{C}^{(1)}_{(r)} \right\}
-$$
-when approximation (\ref{Eq:approx}) is used.\\
+Similarly, when Approximation $\widetilde{C}_{(r)}^{(1)}$ is used (Equation (\ref{Eq:approx})), we use notations $\widetilde{C}_{(r)}^{(K)}$ and $\widetilde{m}_{(r)}^{(K)}$.
+%$$\widetilde{C}_{(r)}^{(K)} =\min_{m \in \mathcal{M}^{(K)}_{(r)}} \left\{ \sum_{r \in m} \widetilde{C}^{(1)}_{(r)} \right\}, \text{ and }\widetilde{m}_{(r)}^{(K)} = \underset{m \in \mathcal{M}^{(K)}_{(r)}}{\operatorname{argmin}} \left\{ \sum_{r \in m} \widetilde{C}^{(1)}_{(r)} \right\}.$$
 
-When the cost or loss of a segmentation is segment additive (which is the case in both models), a $\mathcal{O}(Kn^2)$ Dynamic Programming algorithm can be built to recover the best exact segmentation (into $1$ to $K$ segments).
+When the cost of a segmentation is segment additive (which is the case in both models), a $\mathcal{O}(Kn^2)$ Dynamic Programming algorithm can be built to recover the best exact segmentation (into $1$ to $K$ segments).
 
 \subsection{Original Dynamic Programming algorithm for segmentation}
 
@@ -119,45 +115,38 @@ This algorithm assumes that all $C_{t_1, t_2}^{(1)}$ have been pre-computed and 
 a $n$ by $n$ matrix) or that they can be efficiently computed on the fly, which is the case for every models we consider here. At step $k, t$ of Algorithm \ref{algo:DPA2}  $\mathcal{O}(t)$ basic operations are performed. If we sum these for all $k < K$ and $t < n$  we see that the algorithm has a $\mathcal{O}(Kn^2)$ time complexity. This $n^2$ factor is the main reason why Dynamic Programming can be prohibitive to use on large signals (like SNP arrays for instance).
 
 \begin{algorithm}
-  \caption{Standard Dynamic Programming algorithm}\label{algo:DPA2}
+  \caption{Standard DP algorithm}\label{algo:DPA2}
   \begin{algorithmic}
-    \State \textbf{Input}: $Y(t)$ a sequence of $n$ data-points, $K$ an integer
+    \State \textbf{Input}: $Y(t)$ a profile of $n$ observations, $K$ an integer
     \State \textbf{Output}: $C^{(k)}_{1,t}$ in $\mathbb{R}$ for all $k \leq K$ and $t \leq n$
     %I'd like to do \hline here!
     \State $M^{(k)}_{1,t}$ in $\mathbb{N}$ for all $k \leq K$ and $t \leq n$
     \For{$t \in \llbracket 1, n \rrbracket$}
-         \State $C^{(1)}_{1,t} = C_{1t}$ 
-         \State $M^{(1)}_{1,t} = 0$  
+         \State $C^{(1)}_{1,t} = C_{1t}$ ; $M^{(1)}_{1,t} = 0$  
     \EndFor
    %\textbf{Main} & \\
    \For{$k \in \llbracket 2, \min(t, K) \rrbracket$}
       \For{$t \in \llbracket 1, n \rrbracket$} 
-     	\State $C^{(k)}_{1,t} = \underset{k-1 \leq \tau \leq t-1}{\min} \{ C^{(k-1)}_{1,\tau}+ C_{(\tau+1)t}^{(1)} \}$ 
-        \State $M^{(k)}_{1,t} =\underset{k-1 \leq \tau \leq t-1}{\operatorname{argmin}} \{ C^{(k-1)}_{1,\tau}+ C_{(\tau+1)t}^{(1)} \}$ 
-        \EndFor
-   
+     	\State $C^{(k)}_{1,t} = \underset{k-1 \leq \tau \leq t-1}{\min} \{ C^{(k-1)}_{1,\tau}+ C_{(\tau+1)t}^{(1)} \}$ ; $M^{(k)}_{1,t} =\underset{k-1 \leq \tau \leq t-1}{\operatorname{argmin}} \{ C^{(k-1)}_{1,\tau}+ C_{(\tau+1)t}^{(1)} \}$ 
+        \EndFor   
      \EndFor
   \end{algorithmic}
 \end{algorithm}
 
-\subsection{A linear Dynamic Programming Algorithm for the classification loss}
+\subsection{A linear Dynamic Programming Algorithm for the classification cost function}
 
-An important consequence of using the classification loss $\widetilde{C}_{(r)}^{(1)}$ rather than ${C}_{(r)}^{(1)}$ is that the set of canditate segmentations 
+An important consequence of using the classification cost $\widetilde{C}_{(r)}^{(1)}$ rather than ${C}_{(r)}^{(1)}$ is that the set of canditate segmentations 
 can be pruned efficently. The idea of pruning the set of candidate segmentations
-is not new and was proposed for other losses in \cite{rigaill_2010} and \cite{killick_optimal_2011}.
+is not new and was proposed for other cost functions  \cite{rigaill_2010,killick_optimal_2011}.
 In these two algorithms the pruning step usually allows for an important speed up and the average time complexity is for many signal in $\mathcal{O}(n)$ or  $\mathcal{O}(n\log(n))$. Nonetheless, in both cases, the worst case is quadratic with respect to $n$.
-In the case of the classification loss however the pruning step is particularly 
+In the case of the classification cost however the pruning step is particularly 
 efficient %and given that the set of possible values for $\mu_p$ is finite 
 and we can guarantee that the time and space complexity of the algorithm are at worst in $\mathcal{O}(KPn)$. 
-Furthermore, we can also guarantee that the loss of the recovered segmentation $\widetilde{m}_{(r)}^{(K)}$ is at worth within $K \log(p)$ of the optimal segmentation $\widehat{m}_{(r)}^{(K)}$ (see Theorem \ref{theo:theoapprox}). \\
-
-Before we describe the algorithm we need to define some new notations. We define the approximate cost of a segment knowing its mean $\mu$ as 
-$$ \widetilde{C}_{(r)}^{(1)}   (\mu) = \left\{ \frac{\sum_{t \in r} (y(t)- \mu)^2  } {2 \sigma^2 } - \log(\pi_p) \right\}.$$
-Using this notation we can rewrite the classification loss of a segment $r = \llbracket t_1, t_2 \rrbracket$ as $\widetilde{C}_{t_1, t_2}^{(1)}  = \min_p \{  \widetilde{C}_{t_1, t_2}^{(1)}  (\mu_p) \},$ with $\widetilde{C}_{t_1, t_2}^{(1)}  (\mu)$ being point additive in the sense that $\widetilde{C}_{t_1, t_2}^{(1)}  (\mu) = \underset{ t_1 \leq t \leq t_2}{\sum} \widetilde{C}_{t, t}^{(1)}  (\mu).$ Then we define the cost of the best segmentation knowing that the mean of the last segment is $\mu$ as:
+Furthermore, we can also guarantee that the cost of the recovered segmentation $\widetilde{m}_{(r)}^{(K)}$ is at worth within $K \log(p)$ of the optimal segmentation $\widehat{m}_{(r)}^{(K)}$ (see Theorem \ref{theo:theoapprox}). \\
+\indent Before we describe the algorithm we need to define some new notations. We define the approximate cost of a segment knowing its mean $\mu$ as 
+$ \widetilde{C}_{(r)}^{(1)}   (\mu) = \left\{ \sum_{t \in r} (y(t)- \mu)^2  /2 \sigma^2  - \log(\pi_p) \right\}.$ Using this notation we can rewrite the classification cost of a segment $r = \llbracket t_1, t_2 \rrbracket$ as $\widetilde{C}_{t_1, t_2}^{(1)}  = \min_p \{  \widetilde{C}_{t_1, t_2}^{(1)}  (\mu_p) \},$ with $\widetilde{C}_{t_1, t_2}^{(1)}  (\mu)$ being point additive in the sense that $\widetilde{C}_{t_1, t_2}^{(1)}  (\mu) = \underset{ t_1 \leq t \leq t_2}{\sum} \widetilde{C}_{t, t}^{(1)}  (\mu).$ Then we define the cost of the best segmentation knowing that the mean of the last segment is $\mu$ as:
 $$\widetilde{C}_{1, t}^{(K)}(\mu) = \underset{{m \in \mathcal{M}^{(K)}_{(1, t)}}}{\min} \left\{ \sum_{k < K-1}  \widetilde{C}^{(1)}_{(r_k)}  + \widetilde{C}^{(1)}_{(r_K)}(\mu) \right\}.$$
-Using this notation we get that $ \widetilde{C}_{1, t}^{(k)}  = \underset{p < P}{\min} \left\{ \widetilde{C}_{1, t}^{(k)}(\mu_p) \right\}$, and if we know every $C_{1, t}^{(k)}(\mu_p)$ at step $t$ for all $p< P$, we straightfowardly get $C_{1, t}^{(k)}$ in $\mathcal{O}(p)$.
-
-As $\widetilde{C}_{t_1, t_2} (\mu)$ is point additive the set of potential candidate segmentations can be pruned efficiently as already described \cite{rigaill_2010}. Moreover the set of $\mu_p$ being finite, the 
+Using this notation we get that $ \widetilde{C}_{1, t}^{(k)}  = \underset{p < P}{\min} \left\{ \widetilde{C}_{1, t}^{(k)}(\mu_p) \right\}$, and if we know every $C_{1, t}^{(k)}(\mu_p)$ at step $t$ for all $p< P$, we straightfowardly get $C_{1, t}^{(k)}$ in $\mathcal{O}(p)$. As $\widetilde{C}_{t_1, t_2} (\mu)$ is point additive the set of potential candidate segmentations can be pruned efficiently as already described \cite{rigaill_2010}. Moreover the set of $\mu_p$ being finite, the 
 pruning step is further simplified and can be done using the following theorem.
 
 \begin{theo}
@@ -180,11 +169,11 @@ All $C^{(k)}_{1,1}(\mu_p)$ are initialized as $+\infty$ and $C^{(1)}_{1,t}$ are 
 At step $k, t$ of Algorithm \ref{algo:DPALinear}  $\mathcal{O}(P)$ basic operations are performed. If we sum these for all $k < K$ and $t < n$  we straighfowardly see that the algorithm has an $\mathcal{O}(KPn)$ time complexity.
 \begin{algorithm}
 \begin{algorithmic}
-\caption{Linear Dynamic Programming algorithm for the classification loss}\label{algo:DPALinear}
-    \State \textbf{Input}: $Y(t)$ a sequence of $n$ data-points, $K$ an integer 
- \State \textbf{Input}: $C_{ij}$ cost of the segments $\rrbracket I, j \rrbracket$  for all $(i, j) \in \llbracket1, n \rrbracket^2$\\
-   \State \textbf{Output}: $C^{(k)}_{1,t}$ in $\mathbb{R}$ for all $k \leq K$ and $t \leq n$ \\
-    \State $M^{(k)}_{1,t}$ in $\mathbb{N}$ for all $k \leq K$ and $t \leq n$ \\
+\caption{Linear DP algorithm for the classification cost}\label{algo:DPALinear}
+    \State \textbf{Input}: $Y(t)$ a profile of $n$ observations, $K$ an integer 
+ \State \textbf{Input}: $C_{ij}$ cost of the segments $\rrbracket I, j \rrbracket$  for all $(i, j) \in \llbracket1, n \rrbracket^2$
+   \State \textbf{Output}: $C^{(k)}_{1,t}$ in $\mathbb{R}$ for all $k \leq K$ and $t \leq n$ 
+    \State $M^{(k)}_{1,t}$ in $\mathbb{N}$ for all $k \leq K$ and $t \leq n$ 
    %& $M^{(k)}_{1,t}$ in $\mathbb{N}$ for all $k \times K$ and $t \leq n$ \\
   %  \textbf{Initialize}& \\
   % & \textbf{For} $t \in \llbracket 1, n \rrbracket$ \\
@@ -197,12 +186,10 @@ At step $k, t$ of Algorithm \ref{algo:DPALinear}  $\mathcal{O}(P)$ basic operati
       \For{ $k \in \llbracket 2, \min(t, K) \rrbracket$}
        \For{$t \in \llbracket 1, n \rrbracket$}
         \For {$p \in \llbracket 1, P \rrbracket$}  
-           \State $C^{(k)}_{1,t}(\mu_p) = \min \{ C^{(k)}_{1,t-1}(\mu_p), C^{(k-1)}_{1,t-1} \}$ 
-            \State      $M^{(k)}_{1,t}(\mu_p) = \operatorname{argmin} \{C^{(k)}_{1,t-1}(\mu_p), C^{(k-1)}_{1,t-1} \}$ 
+           \State $C^{(k)}_{1,t}(\mu_p) = \min \{ C^{(k)}_{1,t-1}(\mu_p), C^{(k-1)}_{1,t-1} \}$ ; 
+           \State $M^{(k)}_{1,t}(\mu_p) = \operatorname{argmin} \{C^{(k)}_{1,t-1}(\mu_p), C^{(k-1)}_{1,t-1} \}$ 
           \EndFor        
-           \State $C^{(k)}_{1,t} = \underset{p}{\min} \{ C^{(k)}_{1,t}(\mu_p) \}$ 
-	   \State $p^* = \underset{p}{\operatorname{argmin}} \{ C^{(k)}_{1,t}(\mu_p) \}$ 
-           \State $M^{(k)}_{1,t} = M^{(k)}_{1,t}( \mu_{{p^*}}) $ 
+           \State $C^{(k)}_{1,t} = \underset{p}{\min} \{ C^{(k)}_{1,t}(\mu_p) \}$ ; $p^* = \underset{p}{\operatorname{argmin}} \{ C^{(k)}_{1,t}(\mu_p) \}$ ; $M^{(k)}_{1,t} = M^{(k)}_{1,t}( \mu_{{p^*}}) $ 
          \EndFor
     \EndFor
   \end{algorithmic}
@@ -265,9 +252,9 @@ Joint segmentation presents an additional algorithmic challenge. When each $K_i$
 \begin{algorithm}
 \begin{algorithmic}
 \caption{Parallel Algorithm for Joint segmentation}\label{algo:parallelDP}
-\State \textbf{Input}: $\{Y_i(t)\}$, $I$ sequences of $n$ data-points, $K$ an integer 
-\State \textbf{Input}: $C_{ij}$ cost of the segments $\rrbracket i, j \rrbracket$  for all $(i, j) \in \llbracket1, n \rrbracket^2$\\
-\State \textbf{Output}:  $\{\widehat{K}_1,..., \widehat{K}_I\}$, $C^{(\widehat{K}_i)}_{1,t}$ in $\mathbb{R}$ for all $i \leq I$, $k \leq K_i$ and $t \leq n$ \\
+\State \textbf{Input}: $\{Y_i(t)\}$, $I$ profiles of $n$ observations, $K$ an integer 
+\State \textbf{Input}: $C_{ij}$ cost of the segments $\rrbracket i, j \rrbracket$  for all $(i, j) \in \llbracket1, n \rrbracket^2$
+\State \textbf{Output}:  $\{\widehat{K}_1,..., \widehat{K}_I\}$, $C^{(\widehat{K}_i)}_{1,t}$ in $\mathbb{R}$ for all $i \leq I$, $k \leq K_i$ and $t \leq n$ 
 \While{not convergence}
 \For{$i \in \{1,...I\}$} {\bf in parallel}
 \State compute $C^{(k)}_{1,t}$  $\forall k \leq K$ and $t \leq n$ with Algorithm \ref{algo:DPALinear}
@@ -277,20 +264,10 @@ Joint segmentation presents an additional algorithmic challenge. When each $K_i$
   \end{algorithmic}
 \end{algorithm}
 
+\section{Computational footprint and scalability}
 
+All the presented algorithms are available into the \texttt{R} package \soft \footnote{\url{http://cran.r-project.org/web/packages/cghseg}}, which now relies on the \texttt{parallel} package and on the shared memory programming standard \texttt{openMP}. The new package is now designed to be executed in parallel on multiprocessor architectures.
 
-
-\subsection{The R package \esoft (or Implementation)}
-All the presented algorithms are available into the \texttt{R} package \soft, with all the computationaly intensive sections implemented in \texttt{C++}.
-The package is designed to be executed in parallel on multiprocessor architectures: 
-it relies on the standard \texttt{R} package \texttt{parallel} and on the shared memory programming standard \texttt{openMP}.
-Compilation and installation are compliant with the \texttt{R} standard procedure (\texttt{R}$\geq$ \texttt{2.14}). 
-\esoft is available on the \texttt{CRAN} at \url{http://cran.r-project.org/web/packages/cghseg} under the \texttt{GNU} public licence 
-(\url{http://www.gnu.org/licenses/licenses.html}).
-
-
-\section{Discussion}
-\subsection{Computationnal footprint and scalability (or \esoft is efficient and scalable in practice)}
 
 The software design take advantage of multiprocessing to treat the profiles in parallel at every step of the algorithm.
 To assess the quality of the parallel implementation, we developed a simulation scheme to analyze the \esoft execution time 
@@ -303,8 +280,6 @@ for very large datasets. As a benchmark, we simulated datasets with $1024$ profi
 \esoft required $453$ minutes of calculation on average, corresponding to about $4$ hours elapsed time on a $48$ cores (see Table \ref{tabtime}).
 In addition, due to the {\it copy-on-write} mechanism (ref?) of the \texttt{R} package \texttt{parallel} that avoid memory copy between processes, and thanks to the shared memory efficiency assessed with \texttt{openMP}, the memory needs are reasonnable (see Table \ref{tabtime}). Indeed, the only amount of required memory mainly corresponds to the profile dataset.
 Therefore, our method and software package are adapated to the next generation of computers (many cores) and experiments (large profiles).
-
-
 
 
 \begin{table}[ht]
@@ -324,7 +299,7 @@ SNR  &  $\text{CI}_{\text{new}}(\widehat{\text{K}})$ & $\text{CI}_{\text{old}}(\
 \end{tabular}
 \end{small}
 \end{center}
-\caption{Performance comparison between the non parallel (``old'') and the parallel (``new'') version. Confidence intervals are given over 50 replicates for each simulated configuration. Statistical performance is assessed through the precision of the estimation of the number of segments $\hat{K}$, the precision of the estimators of the mean level of each segment ($\hat{\mu}$), the False Discovery and False Negative Rates for breakpoint detection.} 
+\caption{Performance comparison between the non linearized and non parallel (``old'') and the linearized-parallel (``new'') version. Confidence intervals are given over 50 replicates for each simulated configuration. Statistical performance is assessed through the precision of the estimation of the number of segments $\hat{K}$, the precision of the estimators of the mean level of each segment ($\hat{\mu}$), the False Discovery and False Negative Rates for breakpoint detection.} 
 \end{table}
 \begin{figure}[h!]
   \begin{center}
@@ -344,14 +319,14 @@ SNR  &  $\text{CI}_{\text{new}}(\widehat{\text{K}})$ & $\text{CI}_{\text{old}}(\
       %Length of the profiles 
       $I$ (number of profiles) &  \multicolumn{3}{c}{$20,000$} & \multicolumn{3}{c|}{$100,000$} \\
       %Number of profiles 
-      $n$ (data-points/profile) & 256 & 512 & 1024 & 256 & 512 & 1024\\
+      $n$ (observations/profile) & 256 & 512 & 1024 & 256 & 512 & 1024\\
       \hline
       Average CPU time (min) & 6 & 15 & 54     & 31 & 70 & 253 \\
       Memory usage (Gb)      & 0.4 & 0.8 & 1.8    &  1.7 & 3.7 & 7.9 \\
       \hline
     \end{tabular}
     %}
-    \caption{Average computational requirements of \esoft estimated on simulated datasets for a varying number of profiles and data-points, computed on $48$ cores. Notice that we ran 5 times each simulation and averaged the results. Run on a quadri-12 cores Opteron 2.2 GHz, 256 Gb RAM.}
+    \caption{Average computational requirements of \esoft estimated on simulated datasets for a varying number of profiles and observations, computed on $48$ cores. Notice that we ran 5 times each simulation and averaged the results. Run on a quadri-12 cores Opteron 2.2 GHz, 256 Gb RAM.}
     \label{tabtime}
   \end{center}
 \end{table}
@@ -379,9 +354,9 @@ The optimal cost in $K$ segments from $r = \llbracket t_1, t_2 \rrbracket$ is de
 $$C_{t_1, t_2}^{(K)} = C_{(r)}^{(K)} = \min_{m \in \mathcal{M}^{(K)}_{(r)}} \left\{ \sum_{r \in m} C^{(1)}_{(r)} \right\}.$$
 The corresponding  optimal segmentation is defined as :
 $$\widehat{m}_{t_1, t_2}^{(K)} = \widehat{m}_{(r)}^{(K)} = \underset{m \in \mathcal{M}^{(K)}_{(r)}}{\operatorname{argmin}} \left\{ \sum_{r \in m} C^{(1)}_{(r)} \right\}.$$
-The cost or loss of a segmentation is segment additive. Using this segment additivity one can built an $\Theta(Kn^2)$ dynamic programming algorithm to recover the best segmentations (in $1$ to $K$ segments).
+The cost of a segmentation is segment additive. Using this segment additivity one can built an $\Theta(Kn^2)$ dynamic programming algorithm to recover the best segmentations (in $1$ to $K$ segments).
 
-Here we propose to approximate this loss in a K-mean fashion
+Here we propose to approximate this cost in a K-mean fashion
 More specifically we propose two possible approximations, the first is:
 \begin{eqnarray} \widetilde{C}_{(r)}^{(1)} \approx  \min_p \left\{ \sum_{i \in r}\frac{(x_i - \mu_p)^2} {2\sigma^2 }\right\}
 \label{equation:approximation2}\end{eqnarray} 
