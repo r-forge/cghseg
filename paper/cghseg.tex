@@ -1,4 +1,4 @@
-\documentclass[article,10pt]{llncs}
+\documentclass{llncs}
 \usepackage{makeidx}  % allows for indexgeneration
 
 \usepackage[latin1]{inputenc}
@@ -179,9 +179,6 @@ At step $k, t$ of Algorithm \ref{algo:DPALinear}  $\mathcal{O}(P)$ basic operati
 \begin{algorithm}
 \begin{algorithmic}
 \caption{Linear Dynamic Programming algorithm for the classification loss}\label{algo:DPALinear}
-
-
-
     \State \textbf{Input}: $Y(t)$ a sequence of $n$ data-points, $K$ an integer 
  \State \textbf{Input}: $C_{ij}$ cost of the segments $\rrbracket I, j \rrbracket$  for all $(i, j) \in \llbracket1, n \rrbracket^2$\\
    \State \textbf{Output}: $C^{(k)}_{1,t}$ in $\mathbb{R}$ for all $k \leq K$ and $t \leq n$ \\
@@ -265,14 +262,16 @@ Joint segmentation presents an additional algorithmic challenge. When each $K_i$
 
 \begin{algorithm}
 \begin{algorithmic}
-\caption{Paralell Algorithm for Joint segmentation}\label{algo:parallelDP}
+\caption{Parallel Algorithm for Joint segmentation}\label{algo:parallelDP}
 \State \textbf{Input}: $\{Y_i(t)\}$, $I$ sequences of $n$ data-points, $K$ an integer 
 \State \textbf{Input}: $C_{ij}$ cost of the segments $\rrbracket i, j \rrbracket$  for all $(i, j) \in \llbracket1, n \rrbracket^2$\\
 \State \textbf{Output}:  $\{\widehat{K}_1,..., \widehat{K}_I\}$, $C^{(\widehat{K}_i)}_{1,t}$ in $\mathbb{R}$ for all $i \leq I$, $k \leq K_i$ and $t \leq n$ \\
-\For{ Parallel $i \in \{1,...I\}$}
-\State compute $C^{(k)}_{1,t}$  $\forall k \leq K$ and $t \leq n$
+\While{not convergence}
+\For{$i \in \{1,...I\}$} {\bf in parallel}
+\State compute $C^{(k)}_{1,t}$  $\forall k \leq K$ and $t \leq n$ with Algorithm \ref{algo:DPALinear}
 \EndFor
-\State compute $\{\widehat{K}_1,..., \widehat{K}_I\}$
+\State compute $\{\widehat{K}_1,..., \widehat{K}_I\}$ with {\bf sequential} DP \cite{PLH11}
+\EndWhile
   \end{algorithmic}
 \end{algorithm}
 
@@ -295,7 +294,7 @@ The software design take advantage of multiprocessing to treat the profiles in p
 To assess the quality of the parallel implementation, we developed a simulation scheme to analyze the \esoft execution time 
 with varying number of profiles and number of available CPU units (cores).
 We simulated $256, 512$ and $1024$ profiles of length $20,000$ with k.mean=10,SNR=5,lambda=10 and we ran \esoft on up to $48$ cores.
-We observed a relative speedup decrease (see Fig.\ref{figspeedup}) with the number of cores and profiles. Indeed, the lower is the number of profiles the less time consuming are the sequential parts compared with the parallel parts. Meanwhile, when the datasets comes large in the number of profiles, the speedup better follows the Amdahl's law that predicts the theoretical maximum speedup (see dashed lines Fig.\ref{figspeedup}): indeed the Amdahl's law established that the speedup follow $1/(alpha+(1-alpha)/p)$ where.... We deduced that some overhead due to the mechanisms that launch the parallel sections (mainly in the \texttt{R} package \texttt{parallel}) comes to be less negligible when the datasets are not large enough, but also that the quality of the implementation is therefore demonstrated especially for large datasets.
+We observed a relative speedup decrease (see Fig.\ref{figspeedup}) with the number of cores and profiles. Indeed, the lower is the number of profiles the less time consuming is the sequential part compared with the parallel part (see Algorithm \ref{algo:parallelDP}). Meanwhile, when the datasets comes large in the number of profiles, the speedup better follows the Amdahl's law that predicts the theoretical maximum speedup (see dashed lines Fig.\ref{figspeedup}, ref???): the Amdahl's law established that the speedup follows $1/(\alpha+(1-\alpha)/p)$ where $\alpha$ is the time proportion of the sequential part and $p$ the number of cores. We deduced that some overhead due to the mechanisms that launch the parallel sections (mainly in the \texttt{R} package \texttt{parallel}) comes to be less negligible when the datasets are not large enough, but also that the quality of the implementation is therefore demonstrated especially for large datasets.
 
 While the main interest of \esoft is the quality of its results, the associated computational expense is affordable even
 for very large datasets. As a benchmark, we simulated datasets with $1024$ profiles of length $100,000$ with k.mean=10,SNR=5,lambda=10. This corresponds to the up-tu-date limits of the available datasets??? 
@@ -327,8 +326,8 @@ SNR  &  $\text{CI}_{\text{new}}(\widehat{\text{K}})$ & $\text{CI}_{\text{old}}(\
 \end{table}
 \begin{figure}[h!]
   \begin{center}
-    \includegraphics[height=10cm]{figures/speedup}
-    \caption{Speedup. Notice that we ran 5 times each simulation and averaged the results.}
+    \includegraphics[height=5cm]{figures/speedup}
+    \caption{Average speedup of \esoft observed  on simulated datasets for a varying number of profiles and available core (plain lines). Amdahl's law is empirically adjusted to the computing results with $256,512$ and $1024$ profiles (dashed lines, with $\alpha=0.2,1.2,4.5\%$ respectively). Notice that we ran 5 times each simulation and averaged the results. Run on a quadri-12 cores Opteron 2.2 GHz, 256 Gb RAM.}
     \label{figspeedup}
   \end{center}
 \end{figure}
@@ -337,18 +336,20 @@ SNR  &  $\text{CI}_{\text{new}}(\widehat{\text{K}})$ & $\text{CI}_{\text{old}}(\
   \begin{center}
     %\scriptsize{
     %\scalebox{0.89}{
-    \begin{tabular}{>{\columncolor{lightgray}}c|ccc|ccc}
+    %\begin{tabular}{>{\columncolor{lightgray}}c|ccc|ccc}
+    \begin{tabular}{|c|ccc|ccc|}
       \hline
-      Length of the profiles &  \multicolumn{3}{c}{$20,000$} & \multicolumn{3}{c}{$100,000$} \\
-      Number of profiles & 256 & 512 & 1024 & 256 & 512 & 1024\\
+      %Length of the profiles 
+      $I$ (number of profiles) &  \multicolumn{3}{c}{$20,000$} & \multicolumn{3}{c|}{$100,000$} \\
+      %Number of profiles 
+      $n$ (data-points/profile) & 256 & 512 & 1024 & 256 & 512 & 1024\\
       \hline
       Average CPU time (min) & 6 & 15 & 54     & 31 & 70 & 253 \\
       Memory usage (Gb)      & 0.4 & 0.8 & 1.8    &  1.7 & 3.7 & 7.9 \\
       \hline
     \end{tabular}
     %}
-    \caption{Average performance of . on $48$ cores (quadri-12 cores Opteron 2.2 GHz + memory
-Notice that we ran 5 times each simulation and averaged the results.}
+    \caption{Average computational requirements of \esoft estimated on simulated datasets for a varying number of profiles and data-points, computed on $48$ cores. Notice that we ran 5 times each simulation and averaged the results. Run on a quadri-12 cores Opteron 2.2 GHz, 256 Gb RAM.}
     \label{tabtime}
   \end{center}
 \end{table}
