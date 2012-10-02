@@ -141,7 +141,11 @@ a $n$ by $n$ matrix) or that they can be efficiently computed on the fly, which 
 \subsection{A linear Dynamic Programming Algorithm for the classification loss}
 
 An important consequence of using the classification loss $\widetilde{C}_{(r)}^{(1)}$ rather than ${C}_{(r)}^{(1)}$ is that the set of canditate segmentations 
-can be pruned efficently \cite{rigaill_2010}. In our case given that the set of possible values for $\mu_p$ is finite we can even guarantee the time and space complexity of the algorithm to be $\mathcal{O}(KPn)$. 
+can be pruned efficently. The idea of pruning the set of candidate segmentations
+is not new and was proposed for other losses in \cite{rigaill_2010} and \cite{killick_optimal_2011}.
+In these two algorithms the pruning step usually allow for an important speed up and the average time complexity is for many signal in $\mathcal{O}(n)$ or  $\mathcal{O}(n\log(n))$. Nonetheless, in both cases, the worst case is quadratic with respect to $n$.
+In the case of the classification loss however the pruning step is particularly efficient%and given that the set of possible values for $\mu_p$ is finite 
+and we can guarantee that the time and space complexity of the algorithm are at worst in $\mathcal{O}(KPn)$. 
 Furthermore, we can also guarantee that the loss of the recovered segmentation $\widetilde{m}_{(r)}^{(K)}$ is at worth within $K \log(p)$ of the optimal segmentation $\widehat{m}_{(r)}^{(K)}$ (see Theorem \ref{theo:theoapprox}). \\
 
 Before we describe the algorithm we need to define some new notations. We define the approximate cost of a segment knowing its mean $\mu$ as 
