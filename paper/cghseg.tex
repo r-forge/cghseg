@@ -1,4 +1,4 @@
-\documentclass{llncs}
+\documentclass[11pt]{llncs}
 \usepackage{makeidx}  % allows for indexgeneration
 
 \usepackage[latin1]{inputenc}
@@ -37,7 +37,7 @@
 
 \title{High Dimension Segmentation using the \texttt{cghseg} package}
 %
-\titlerunning{High dimension with \texttt{cghseg}}  % abbreviated title (for running head)
+\titlerunning{High dimension segmentation with \texttt{cghseg}}  % abbreviated title (for running head)
 %                                     also used for the TOC unless
 %                                     \toctitle is used
 %
@@ -53,8 +53,7 @@
 \and
 Laboratoire de Biom\'etrie et Biologie Evolutive, UMR CNRS 5558 Universit\'{e} Lyon 1, F-69622, Villeurbanne, France \\
 \email{vincent.miele@univ-lyon1.fr},\\ 
-\email{franck.picard@univ-lyon1.fr}
-}
+\email{franck.picard@univ-lyon1.fr}}
 
 \maketitle   
 
@@ -64,7 +63,12 @@ The method comes with a {\it next generation} \texttt{R} package, called \soft, 
 \keywords{}
 \end{abstract}
 
+
+\newpage
 \section{Introduction}
+
+Segmenting heterogeneous signals into regions of common characteristics is often required for biologists that face high dimensional information. This partitioning helps reducing the dimension of the data and provides guidelines for interpretation and further biological investigation. Such methods have been widely applied in Genomics, to unravel DNA sequences structures using on base-composition \cite{NBM02}, to segment expression profiles \cite{DHG06,NLR09}, and of course, of to determine copy-number variations based on array CGH data. Microarray CGH data analysis is certainly the field for which every possible method of segmentation have been tried. Three main categories of segmentation methods lead to many developments, circular binary segmentation \cite{OVL04}, Hidden Markov Models \cite{MTT06}, and change-point analysis \cite{picard_statistical_2005,picard_2007}. Our purpose in this work is not to compare the different methods for array CGH analysis. Such comparisons have been done elsewhere \cite{WF05}, and extensive reviews now exist on the subject \cite{S08,WPW11}. Our focus is the following: in every comparative study, change-point analysis based on Dynamic Programming (DP) has show the best performance along with CBS. The advantage of DP-based segmentation is that it provides the best global segmentation, $i.e.$ the segmentation that globally minimizes a likelihood criterion, whereas local approaches like CBS only provide local minimizers. Moreover, change-point models can also integrate a calling step that is used to cluster segment that show the same copy-number on average \cite{picard_2007,WKV07}, which has been shown to be of central importance in the segmentation process \cite{WF05}. Unfortunatelly, the algorithmic complexity of DP is proportional to the square of the signal's length, which has hampered the use of such method on high-density arrays for instance. This issue has become even more problematic with the growing population-based or joint segmentation \cite{PLH11, TPK11,ZSJ10}. Our contribution is two-fold: first we provide a linearized version of the DP algorithm for segmentation and segmentation/clustering using pruning strategies that have recently emerged in the fied \cite{killick_optimal_2011,rigaill_2010}. Secondly we deal with the joint segmentation issue by providing a parallel version of existing algorithms implemented in the \texttt{cghseg} package. With the growing availability of multicore computers (from laptops to many-core servers), it has become essential to provide software that use every available ressource. \texttt{R} has been a tremendous plateform for package distribution, and here we provide a new version of the \texttt{cghseg} package, a \textit{next generation package} that is adaptive computing power. The performance of \texttt{cghseg} are impressive : segmenting 1,000 profiles of length 100,000 can now be done in few hours, which was impossible before. This makes segmentation models a new exact investigation method that can be used in routine for exploratory as well as deep analysis.
+
 \section{Linearization of Dynamic Programming for segmentation and segmentation/clustering} 
 
 The purpose of segmentation is to partition a signal of $n$ observations $\{Y(t)\}$ into $K$ segments of homogeneous distributional parameter. In this section we deal with the univariate segmentation of one array CGH profile, the case of Joint multivariate segmentation being considered in Section 3. In the following a segment is an interval delimited by two change-points $\tau_k, \tau_{k+1}$ for instance,  with convention $\tau_0 = 1$ and $\tau_K = n+1$, and notation $r_k=\llbracket \tau_k, \tau_{k+1} -1\rrbracket$ stands for segment $k$. A segmentation in $K$ segments is denoted by $m^{(K)} = \{r_1, r_2 \ldots, r_K\}$.
@@ -135,8 +139,6 @@ a $n$ by $n$ matrix) or that they can be efficiently computed on the fly, which 
      \EndFor
   \end{algorithmic}
 \end{algorithm}
-
-\subsection{A linear Dynamic Programming Algorithm for the segmentation loss}
 
 \subsection{A linear Dynamic Programming Algorithm for the classification loss}
 

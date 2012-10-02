@@ -1,3 +1,80 @@
+
+@Article{TPK11,
+   Author="Teo, S. M.  and Pawitan, Y.  and Kumar, V.  and Thalamuthu, A.  and Seielstad, M.  and Chia, K. S.  and Salim, A. ",
+   Title="{{M}ulti-platform segmentation for joint detection of copy number variants}",
+   Journal="Bioinformatics",
+   Year="2011",
+   Volume="27",
+   Number="11",
+   Pages="1555--1561",
+   Month="Jun"
+}
+@Article{ZSJ10,
+   Author="Zhang, N. R.  and Siegmund, D. O.  and Ji, H.  and Li, J. Z. ",
+   Title="{{D}etecting simultaneous changepoints in multiple sequences}",
+   Journal="Biometrika",
+   Year="2010",
+   Volume="97",
+   Number="3",
+   Pages="631--645",
+   Month="Sep"
+}
+@Article{WPW11,
+   Author="van de Wiel, M. A.  and Picard, F.  and van Wieringen, W. N.  and Ylstra, B. ",
+   Title="{{P}reprocessing and downstream analysis of microarray {D}{N}{A} copy number profiles}",
+   Journal="Brief. Bioinformatics",
+   Year="2011",
+   Volume="12",
+   Number="1",
+   Pages="10--21",
+   Month="Jan"
+}
+@Article{NBM02,
+   Author="Nicolas, P.  and Bize, L.  and Muri, F.  and Hoebeke, M.  and Rodolphe, F.  and Ehrlich, S. D.  and Prum, B.  and Bessieres, P. ",
+   Title="{{M}ining {B}acillus subtilis chromosome heterogeneities using hidden {M}arkov models}",
+   Journal="Nucleic Acids Res.",
+   Year="2002",
+   Volume="30",
+   Number="6",
+   Pages="1418--1426",
+   Month="Mar"
+}
+@Article{S08,
+   Author="Shah, S. P. ",
+   Title="{{C}omputational methods for identification of recurrent copy number alteration patterns by array {C}{G}{H}}",
+   Journal="Cytogenet. Genome Res.",
+   Year="2008",
+   Volume="123",
+   Number="1-4",
+   Pages="343--351"
+}
+
+
+@article(WF05,
+            author = "Willenbrock, H. and Fridlyand, J.",
+            title = "A comparison study: applying segmentation to array {CGH} data for downstream analyses.",
+            journal = "Bioinformatics",
+            volume = "21",
+            number = "22",
+            pages = "4084--4091",
+            year = 2005)
+@article(WKV07,
+            author = "van de Wiel, MA. and Kim, KI. and Vosse, SJ. and van Wieringen, WN. and Wilting, SM. and Ylstra, B.",
+            title = "{CGH}call: calling aberrations for array CGH tumor profiles.",
+            journal = "Bioinformatics",
+            volume = "23",
+            number = "7",
+            pages = "892-894",
+            year = 2007)
+@article(OVL04,
+            author = "AB. Olshen and ES. Venkatraman and R. Lucito and M. Wigler",
+            title = "Circular Binary segmentation for the analysis of array-based {DNA} copy number data",
+            journal = "Biostatistics",
+            volume = "5",
+            number = "4",
+            pages = "557--572",
+            year = 2004,
+            subject="{CGH}")
 @TechReport{Gue08a,
   author       = "Gu\'edon, Y.",
   title        = "Exploring the segmentation space for the assessment of multiple change-point models",
@@ -5,8 +82,36 @@
   number       = "6619",
   year         = "2008",
   url          = "http://www-sop.inria.fr/virtualplants/Publications/2008/Gue08a"
-},
-
+}
+@Article{DHG06,
+   Author="David, L.  and Huber, W.  and Granovskaia, M.  and Toedling, J.  and Palm, C. J.  and Bofkin, L.  and Jones, T.  and Davis, R. W.  and Steinmetz, L. M. ",
+   Title="{{A} high-resolution map of transcription in the yeast genome}",
+   Journal="Proc. Natl. Acad. Sci. U.S.A.",
+   Year="2006",
+   Volume="103",
+   Number="14",
+   Pages="5320--5325",
+   Month="Apr"
+}
+@Article{NLR09,
+   Author="Nicolas, P.  and Leduc, A.  and Robin, S.  and Rasmussen, S.  and Jarmer, H.  and Bessieres, P. ",
+   Title="{{T}ranscriptional landscape estimation from tiling array data using a model of signal shift and drift}",
+   Journal="Bioinformatics",
+   Year="2009",
+   Volume="25",
+   Number="18",
+   Pages="2341--2347",
+   Month="Sep"
+}
+@article{MTT06,
+	    author = {J.C. Marioni and N.P. Thorne and S. Tavare},
+	    title = {Bio{HMM}: a heterogeneous hidden Markov model for segmenting array {CGH} data},
+	    journal = {Bioinformatics},
+	    volume = {22},
+	    number = {9},
+	    pages = {1144-1146},
+	    year = {2006}}
+}
 @article{PLH11,
   title = {Joint Segmentation, Calling and Normalizatino of multiple array {CGH} profiles},
   volume = {12},
@@ -37,7 +142,7 @@
 	doi = {10.1186/1471-2105-6-27},
 	abstract = {{BACKGROUND:} {Microarray-CGH} experiments are used to detect and map chromosomal imbalances, by hybridizing targets of genomic {DNA} from a test and a reference sample to sequences immobilized on a slide. These probes are genomic {DNA} sequences {(BACs)} that are mapped on the genome. The signal has a spatial coherence that can be handled by specific statistical tools. Segmentation methods seem to be a natural framework for this purpose. A {CGH} profile can be viewed as a succession of segments that represent homogeneous regions in the genome whose {BACs} share the same relative copy number on average. We model a {CGH} profile by a random Gaussian process whose distribution parameters are affected by abrupt changes at unknown coordinates. Two major problems arise: to determine which parameters are affected by the abrupt changes (the mean and the variance, or the mean only), and the selection of the number of segments in the profile. {RESULTS:} We demonstrate that existing methods for estimating the number of segments are not well adapted in the case of array {CGH} data, and we propose an adaptive criterion that detects previously mapped chromosomal aberrations. The performances of this method are discussed based on simulations and publicly available data sets. Then we discuss the choice of modeling for array {CGH} data and show that the model with a homogeneous variance is adapted to this context. {CONCLUSIONS:} Array {CGH} data analysis is an emerging field that needs appropriate statistical tools. Process segmentation and model selection provide a theoretical framework that allows precise biological interpretations. Adaptive methods for model selection give promising results concerning the estimation of the number of altered regions on the genome.},
 	journal = {{BMC} Bioinformatics},
-	author = {Franck Picard and Stephane Robin and Marc Lavielle and Christian Vaisse and {Jean-Jacques} Daudin},
+	author = {F. Picard and S. Robin and M. Lavielle and C. Vaisse and {J.-J.} Daudin},
 	year = {2005},
 	note = {{PMID:} 15705208},
 	keywords = {Algorithms, Chromosome Aberrations, Chromosome Mapping, Chromosomes, Artificial, Bacterial, Computational Biology, Computer Graphics, Computer Simulation, Data Interpretation, Statistical, Database Management Systems, {DNA,} Gene Dosage, Gene Expression Profiling, Genetic Markers, Genome, Genome, Human, Humans, Models, Genetic, Models, Statistical, Normal Distribution, Nucleic Acid Conformation, Nucleic Acid Hybridization, Oligonucleotide Array Sequence Analysis, Oligonucleotide Probes, Software, {User-Computer} Interface},
