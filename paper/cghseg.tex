@@ -95,7 +95,7 @@ A main difference between the two models lies in the estimation of the mean para
 In the case of segmentation/clustering, we propose to simplify the cost function by using a \textit{classification cost function}, an approximation denoted by $\widetilde{C}_{(r)}^{(1)}$ which consists in focusing on the dominant term within the sum over $P$ exponentials:
 \begin{equation}
 \label{Eq:approx}
-\widetilde{C}_{(r)}^{(1)}= \min_p \left\{ \sum_{t \in r}\frac{(y(t) - \mu_p)^2} {2\sigma^2 } + \log(\pi_p)\right\}.
+\widetilde{C}_{(r)}^{(1)}= \min_p \left\{ \sum_{t \in r}{(y(t) - \mu_p)^2} /{2\sigma^2 } + \log(\pi_p)\right\}.
 \end{equation}
 
 Since the purpose is to find the global minimum of the total cost function into $K$ segments, we also introduce the set of all segmentations of a given segment $r$ into $K$ segments such that $\mathcal{M}^{(K)}_{(r)} = \mathcal{M}^{(K)}_{t_1, t_2}$. Then the optimal cost of a segmentation of $r$ into $K$ segments and its associated optimal segmentation are defined as:
@@ -151,7 +151,7 @@ and we can guarantee that the time and space complexity of the algorithm are at 
 Furthermore, we can also guarantee that the cost of the recovered segmentation $\widetilde{m}_{(r)}^{(K)}$ is at worth within $K \log(p)$ of the optimal segmentation $\widehat{m}_{(r)}^{(K)}$ (see Theorem \ref{theo:theoapprox}). \\
 \indent Before we describe the algorithm we need to define some new notations. We define the approximate cost of a segment knowing its mean $\mu$ as 
 $ \widetilde{C}_{(r)}^{(1)}   (\mu) = \left\{ \sum_{t \in r} (y(t)- \mu)^2  /2 \sigma^2  - \log(\pi_p) \right\}.$ Using this notation we can rewrite the classification cost of a segment $r = \llbracket t_1, t_2 \rrbracket$ as $\widetilde{C}_{t_1, t_2}^{(1)}  = \min_p \{  \widetilde{C}_{t_1, t_2}^{(1)}  (\mu_p) \},$ with $\widetilde{C}_{t_1, t_2}^{(1)}  (\mu)$ being point additive in the sense that $\widetilde{C}_{t_1, t_2}^{(1)}  (\mu) = \underset{ t_1 \leq t \leq t_2}{\sum} \widetilde{C}_{t, t}^{(1)}  (\mu).$ Then we define the cost of the best segmentation knowing that the mean of the last segment is $\mu$ as:
-$$\widetilde{C}_{1, t}^{(K)}(\mu) = \underset{{m \in \mathcal{M}^{(K)}_{(1, t)}}}{\min} \left\{ \sum_{k < K-1}  \widetilde{C}^{(1)}_{(r_k)}  + \widetilde{C}^{(1)}_{(r_K)}(\mu) \right\}.$$
+$\widetilde{C}_{1, t}^{(K)}(\mu) = \underset{{m \in \mathcal{M}^{(K)}_{(1, t)}}}{\min} \left\{ \sum_{k < K-1}  \widetilde{C}^{(1)}_{(r_k)}  + \widetilde{C}^{(1)}_{(r_K)}(\mu) \right\}.$
 Using this notation we get that $ \widetilde{C}_{1, t}^{(k)}  = \underset{p < P}{\min} \left\{ \widetilde{C}_{1, t}^{(k)}(\mu_p) \right\}$, and if we know every $C_{1, t}^{(k)}(\mu_p)$ at step $t$ for all $p< P$, we straightfowardly get $C_{1, t}^{(k)}$ in $\mathcal{O}(p)$. As $\widetilde{C}_{t_1, t_2} (\mu)$ is point additive 
 updating $\widetilde{C}_{t_1, t_2} (\mu)$ is easy and can be done efficiently using the following theorem.
 
@@ -164,11 +164,12 @@ $ \widetilde{C}_{1, t+1}^{(k)}(\mu) = \min \left\{ \widetilde{C}_{1, t}^{(k)}(\m
 
 \paragraph{Proof. } Let us first notice that: 
 $ \widetilde{C}_{1, t+1}^{(k)}(\mu) =  \underset{{\tau < t+1} }{\min}\left\{  \widetilde{C}_{(1,\tau)}^{(k-1)}  +  \widetilde{C}_{(\tau+1, t)}^{(1)}(\mu) \right\}
-.$
-From this and using the point additivness of $ C_{(\tau+1, t+1)}^{(1)}(\mu)$ we get that:
-\begin{eqnarray*}
- \widetilde{C}_{1, t+1}^{(k)}(\mu) = & \min \left\{ \ \underset{{\tau < t}}{\min} \left(  \widetilde{C}_{(1,\tau)}^{(k-1)}  +  \widetilde{C}_{(\tau+1, t)}^{(1)}(\mu) \right), \quad  \widetilde{C}_{(1,t)}^{(k-1)}  \right\} +  \ \widetilde{C}_{(t+1, t+1)}^{(1)}(\mu).
-\end{eqnarray*}
+$
+and that $\widetilde{C}_{1, t}^{(k)}(\mu) =\underset{{\tau < t} }{\min}\{  \widetilde{C}_{(1,\tau)}^{(k-1)} \}$
+%From this and using the point additivness of $ C_{(\tau+1, t+1)}^{(1)}(\mu)$ we get that:
+%\begin{eqnarray*}
+% \widetilde{C}_{1, t+1}^{(k)}(\mu) = & \min \left\{ \ \underset{{\tau < t}}{\min} \left(  \widetilde{C}_{(1,\tau)}^{(k-1)}  +  \widetilde{C}_{(\tau+1, t)}^{(1)}(\mu) \right), \quad  \widetilde{C}_{(1,t)}^{(k-1)}  \right\} +  \ \widetilde{C}_{(t+1, t+1)}^{(1)}(\mu).
+%\end{eqnarray*}
 \noindent From this the theorem follows. $\blacksquare$ \\
 
 Using this theorem, knowing $C_{1, t}^{(k)}(\mu)$ and $C_{1, t}^{(k-1)}$ we get $C_{1, t+1}^{(k)}(\mu)$ in $\mathcal{O}(1)$
@@ -221,14 +222,17 @@ $$ \widetilde{C}_{(R)}^{(K)} - K \log(p)
 \end{theo}
 
 \paragraph{Proof.} 
-We can always write:
-$$ {C}_{(r)}^{(1)} = \widetilde{C}_{(r)}^{(1)} - \log\left(\sum_p \pi_p \exp \left\{ -\frac{\sum_{t \in r} (y(t)- \mu_p)^2 }{ 2 \sigma^2} +\widetilde{C}_{(r)}^{(1)} \right\}\right)$$
-Moreover we have:
-$$-\log(p) \ \leq \ 
-- \log\left(\sum_p \pi_p \exp \left\{ -\frac{\sum_{t \in r} (y(t) - \mu_p)^2 }{ 2 \sigma^2} +\widetilde{C}_{(r)}^{(1)} \right\}\right)
-\ \leq \  
-0$$
-Thus we have:
+%We can always write:
+%$$ {C}_{(r)}^{(1)} = \widetilde{C}_{(r)}^{(1)} - \log\left(\sum_p \pi_p \exp \left\{ -{\sum_{t \in r} (y(t)- \mu_p)^2 }/{ 2 \sigma^2} +\widetilde{C}_{(r)}^{(1)} \right\}\right)$$
+%Moreover we have:
+%$$-\log(p) \ \leq \ 
+%- \log\left(\sum_p \pi_p \exp \left\{ -{\sum_{t \in r} (y(t) - \mu_p)^2 }/{ 2 \sigma^2} +\widetilde{C}_{(r)}^{(1)} \right\}\right)
+%\ \leq \  
+%0$$
+Using the definition of $\widetilde{C}_{(r)}^{(1)}$ we have that for all $p$ and $r$
+
+$  \sum_{t \in r}{(y(t) - \mu_p)^2} /{2\sigma^2 } + \log(\pi_p) \leq  \widetilde{C}_{(r)}^{(1)}.$
+Using this we get:
 \begin{eqnarray}
 \forall r,  \quad \widetilde{C}_{(r)}^{(1)} -\log(p) \leq {C}_{(r)}^{(1)} \leq \widetilde{C}_{(r)}^{(1)} \label{equation:bound1}.
 \end{eqnarray}
