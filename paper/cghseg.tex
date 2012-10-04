@@ -58,15 +58,8 @@ Laboratoire de Biom\'etrie et Biologie Evolutive, UMR CNRS 5558 Universit\'{e} L
 \maketitle   
 
 \begin{abstract}
-
-In DNA copy number analysis change-point methods based on dynamic programming (DP) algorithm have shown very good performances.
-However, the algorithmic complexity of DP hamper the use of such methods on high-density arrays or next generation sequencing data. 
-This complexity issue is particularly critical for segmentation/clustering and joint segmentation of many different profiles.
-Here we provide an at worst linear DP algorithm for segmentation/clustering.
-For the joint segmentation problem we provide a parallel version of existing algorithms implemented in the \texttt{cghseg} package.
-The method comes with a {\it next generation} \texttt{R} package, called \soft, which is fast enough to segment more than 1,000 profiles of length 100,000 in a few hours.
-
-\keywords{DNA copy number, dynamic programming, joint segmentation, parralel computing}
+  Dynamic Programming (DP) based change-point methods have shown very good performance on DNA copy number analysis. However, the quadratic algorithmic complexity of DP has limited their use on high-density arrays or next generation sequencing data. This complexity issue is particularly critical for segmentation and calling of segments, and for the joint segmentation of many different profiles. Our contribution is two-fold. First we provide an at worst linear DP algorithm for segmentation and calling, which allows the use of DP-based segmentation on high-density arrays with a considerably reduced computational cost. For the joint segmentation issue we provide a parallel version of the \texttt{cghseg} package which now allows to analyze more than 1,000 profiles of length 100,000 within a few hours. Therefore our method and software package are adapted to the next generation of computers (multi-cores) and experiments (very large profiles).
+\keywords{DNA Copy Number, Dynamic Programming, Segmentation, Joint Segmentation, Parralel Computing}
 \end{abstract}
 
 
@@ -79,23 +72,19 @@ Segmenting heterogeneous signals into regions of common characteristics is often
 
 The purpose of segmentation is to partition a signal of $n$ observations $\{Y(t)\}$ into $K$ segments of homogeneous distributional parameter. In this section we deal with the univariate segmentation of one array CGH profile, the case of Joint multivariate segmentation being considered in Section 3. In the following a segment is an interval delimited by two change-points $\tau_k, \tau_{k+1}$ for instance,  with convention $\tau_0 = 1$ and $\tau_K = n+1$, and notation $r_k=\llbracket \tau_k, \tau_{k+1} -1\rrbracket$ stands for segment $k$. A segmentation in $K$ segments is denoted by $m^{(K)} = \{r_1, r_2 \ldots, r_K\}$.
 
-A standard statistical model for segmentation is the detection of changes in the mean of a signal, such that $\forall t \in r_k, \,\, Y(t)\sim \mathcal{N}(\mu_k,\sigma^2).$ In the special case of array CGH, an additional step is the ``calling step'' that is performed by introducing additional (hidden) label variables $\{C(r_k)\}_k$ to cluster each segment into categories such as \texttt{deleted}, \texttt{normal}, \texttt{amplified} (not limited to 3 states). Then the segmentation/clustering model becomes (for fixed $P$ and $p=1,...P$)  $$\forall t \in r_k, \,\, Y(t)|\{C(r_k)=p\} \sim \mathcal{N}(\mu_p,\sigma^2).$$
+A standard statistical model for segmentation is the detection of changes in the mean of a signal, such that $\forall t \in r_k, \,\, Y(t)\sim \mathcal{N}(\mu_k,\sigma^2).$ In the special case of array CGH, an additional step is the ``calling step'' that is performed by introducing additional (hidden) label variables $\{C(r_k)\}_k$ to cluster each segment into categories such as \texttt{deleted}, \texttt{normal}, \texttt{amplified} (not limited to 3 states). Then the segmentation/clustering model becomes (for fixed $P$ and $p=1,...P$):  $$\forall t \in r_k, \,\, Y(t)|\{C(r_k)=p\} \sim \mathcal{N}(\mu_p,\sigma^2).$$
 
-Once the statistical model has been defined, the main algorithmic challenge lies in the exact detertination of the boundaries of segments $\{\tau_k\}$ (and not in the estimation of mean parameters $\mu_k$s or $\mu_p$s depending on the model). A well known solution to this problem is to use Dynamic Programming for a given number of segments $K$. Note that in this work, we do not deal with the statistical issue of model selection to estimate $K$ and $P$. We use appropriate model selection criteria that have already been published and discussed elsewhere \cite{picard_statistical_2005,ZS07}.
-
-To perform Dynamic Programming, we need to define the ``unit'' cost of a generic segment $r = \llbracket t_1, t_2 \rrbracket$, which is given by minus the local log-likelihood calculated on $r$:
+Once the statistical model has been defined, the main algorithmic challenge lies in the exact detertination of the boundaries of segments $\{\tau_k\}$ (and not in the estimation of mean parameters $\mu_k$s or $\mu_p$s depending on the model). A well known solution to this problem is to use Dynamic Programming for a given number of segments $K$ to find the best $global$ segmentation in terms of ``cost'' (to be defined). In this work, we do not deal with the issue of model selection to estimate $K$ and $P$, discussed elsewhere \cite{picard_statistical_2005,ZS07}. To perform Dynamic Programming, we need to define the ``unit'' cost of a generic segment $r = \llbracket t_1, t_2 \rrbracket$, which is given by minus the local log-likelihood calculated on $r$:
 $$ C_{(r)}^{(1)} = 
 \begin{cases}
 \sum_{t \in r} (y(t) - \mu_r)^2/2 \sigma^2 \text{, for segmentation in the mean}  \\
 -\log\left(\sum_p \pi_p \exp \left\{ - \sum_{t \in r} (y(t) - \mu_p)^2 / 2 \sigma^2 \right\}\right) \text{, for seg/clust}.
 \end{cases}
 $$ 
-A main difference between the two models lies in the estimation of the mean parameters. In the case of segmentation in the mean, parameters $\{\mu_k\}_k$ can be estimated directly by the empirical means of segments while computing the position of the breaks. In the case of segmentation/clustering, parameters $\{\mu_p\}_p$ are common across segments. Consequently, they are fixed while computing breakpoint coordinates, and they are estimated iteratively by using an EM-algorithm, leading to a DP-EM algorithm \cite{picard_2007}. 
-
-In the case of segmentation/clustering, we propose to simplify the cost function by using a \textit{classification cost function}, an approximation denoted by $\widetilde{C}_{(r)}^{(1)}$ which consists in focusing on the dominant term within the sum over $P$ exponentials:
+A main difference between the two models lies in the estimation of the mean parameters. In the case of segmentation in the mean, parameters $\{\mu_k\}_k$ can be estimated directly by the empirical means of segments while computing the position of the breaks. In the case of segmentation/clustering, parameters $\{\mu_p\}_p$ are common across segments. Consequently, they are fixed while computing breakpoint coordinates, and they are estimated iteratively by using an EM-algorithm, leading to a so-called DP-EM algorithm \cite{picard_2007}. In the case of segmentation/clustering, we propose to simplify the cost function by using a \textit{classification cost function}, an approximation denoted by $\widetilde{C}_{(r)}^{(1)}$ which consists in focusing on the dominant term within the sum over $P$ exponentials:
 \begin{equation}
 \label{Eq:approx}
-\widetilde{C}_{(r)}^{(1)}= \min_p \left\{ \sum_{t \in r}{(y(t) - \mu_p)^2} /{2\sigma^2 } + \log(\pi_p)\right\}.
+\widetilde{C}_{(r)}^{(1)}= \min_p \left\{ \sum_{t \in r}\frac{(y(t) - \mu_p)^2} {2\sigma^2 } + \log(\pi_p)\right\}.
 \end{equation}
 
 Since the purpose is to find the global minimum of the total cost function into $K$ segments, we also introduce the set of all segmentations of a given segment $r$ into $K$ segments such that $\mathcal{M}^{(K)}_{(r)} = \mathcal{M}^{(K)}_{t_1, t_2}$. Then the optimal cost of a segmentation of $r$ into $K$ segments and its associated optimal segmentation are defined as:
@@ -104,10 +93,7 @@ C_{(r)}^{(K)} = \min_{m \in \mathcal{M}^{(K)}_{(r)}} \left\{ \sum_{r \in m} C^{(
 \text{ and }
 \widehat{m}_{(r)}^{(K)} = \underset{m \in \mathcal{M}^{(K)}_{(r)}}{\operatorname{argmin}} \left\{ \sum_{r \in m} C^{(1)}_{(r)} \right\}.
 $$
-Similarly, when Approximation $\widetilde{C}_{(r)}^{(1)}$ is used (Equation (\ref{Eq:approx})), we use notations $\widetilde{C}_{(r)}^{(K)}$ and $\widetilde{m}_{(r)}^{(K)}$.
-%$$\widetilde{C}_{(r)}^{(K)} =\min_{m \in \mathcal{M}^{(K)}_{(r)}} \left\{ \sum_{r \in m} \widetilde{C}^{(1)}_{(r)} \right\}, \text{ and }\widetilde{m}_{(r)}^{(K)} = \underset{m \in \mathcal{M}^{(K)}_{(r)}}{\operatorname{argmin}} \left\{ \sum_{r \in m} \widetilde{C}^{(1)}_{(r)} \right\}.$$
-
-When the cost of a segmentation is segment additive (which is the case in both models), a $\mathcal{O}(Kn^2)$ Dynamic Programming algorithm can be built to recover the best exact segmentation (into $1$ to $K$ segments).
+Similarly, when Approximation $\widetilde{C}_{(r)}^{(1)}$ is used (Equation (\ref{Eq:approx})), we use notations $\widetilde{C}_{(r)}^{(K)}$ and $\widetilde{m}_{(r)}^{(K)}$. When the cost of a segmentation is segment additive (which is the case in both models), a $\mathcal{O}(Kn^2)$ Dynamic Programming algorithm can be built to recover the best exact segmentation (into $1$ to $K$ segments).
 
 \subsection{Original Dynamic Programming algorithm for segmentation}
 
@@ -119,14 +105,12 @@ For simplicity we did not include the initialization of all $C^{(1)}_{1,t}$ for 
 All $C^{(k)}_{1,t}$ are initialized as $+\infty$ and $C^{(1)}_{1,t}$ are initialized using their definition.
 This algorithm assumes that all $C_{t_1, t_2}^{(1)}$ have been pre-computed and stored (in 
 a $n$ by $n$ matrix) or that they can be efficiently computed on the fly, which is the case for every models we consider here. At step $k, t$ of Algorithm \ref{algo:DPA2}  $\mathcal{O}(t)$ basic operations are performed. If we sum these for all $k < K$ and $t < n$  we see that the algorithm has a $\mathcal{O}(Kn^2)$ time complexity. This $n^2$ factor is the main reason why Dynamic Programming can be prohibitive to use on large signals (like SNP arrays for instance).
-
 \begin{algorithm}
   \caption{Standard DP algorithm}\label{algo:DPA2}
   \begin{algorithmic}
     \State \textbf{Input}: $Y(t)$ a profile of $n$ observations, $K$ an integer
-    \State \textbf{Output}: $C^{(k)}_{1,t}$ in $\mathbb{R}$ for all $k \leq K$ and $t \leq n$
+    \State \textbf{Output}: $C^{(k)}_{1,t}$ in $\mathbb{R}$ and $M^{(k)}_{1,t}$ in $\mathbb{N}$ for all $k \leq K$ and $t \leq n$
     %I'd like to do \hline here!
-    \State $M^{(k)}_{1,t}$ in $\mathbb{N}$ for all $k \leq K$ and $t \leq n$
     \For{$t \in \llbracket 1, n \rrbracket$}
          \State $C^{(1)}_{1,t} = C_{1t}$ ; $M^{(1)}_{1,t} = 0$  
     \EndFor
@@ -151,7 +135,7 @@ and we can guarantee that the time and space complexity of the algorithm are at 
 Furthermore, we can also guarantee that the cost of the recovered segmentation $\widetilde{m}_{(r)}^{(K)}$ is at worth within $K \log(p)$ of the optimal segmentation $\widehat{m}_{(r)}^{(K)}$ (see Theorem \ref{theo:theoapprox}). \\
 \indent Before we describe the algorithm we need to define some new notations. We define the approximate cost of a segment knowing its mean $\mu$ as 
 $ \widetilde{C}_{(r)}^{(1)}   (\mu) = \left\{ \sum_{t \in r} (y(t)- \mu)^2  /2 \sigma^2  - \log(\pi_p) \right\}.$ Using this notation we can rewrite the classification cost of a segment $r = \llbracket t_1, t_2 \rrbracket$ as $\widetilde{C}_{t_1, t_2}^{(1)}  = \min_p \{  \widetilde{C}_{t_1, t_2}^{(1)}  (\mu_p) \},$ with $\widetilde{C}_{t_1, t_2}^{(1)}  (\mu)$ being point additive in the sense that $\widetilde{C}_{t_1, t_2}^{(1)}  (\mu) = \underset{ t_1 \leq t \leq t_2}{\sum} \widetilde{C}_{t, t}^{(1)}  (\mu).$ Then we define the cost of the best segmentation knowing that the mean of the last segment is $\mu$ as:
-$\widetilde{C}_{1, t}^{(K)}(\mu) = \underset{{m \in \mathcal{M}^{(K)}_{(1, t)}}}{\min} \left\{ \sum_{k < K-1}  \widetilde{C}^{(1)}_{(r_k)}  + \widetilde{C}^{(1)}_{(r_K)}(\mu) \right\}.$
+$$\widetilde{C}_{1, t}^{(K)}(\mu) = \underset{{m \in \mathcal{M}^{(K)}_{(1, t)}}}{\min} \left\{ \sum_{k < K-1}  \widetilde{C}^{(1)}_{(r_k)}  + \widetilde{C}^{(1)}_{(r_K)}(\mu) \right\}.$$
 Using this notation we get that $ \widetilde{C}_{1, t}^{(k)}  = \underset{p < P}{\min} \left\{ \widetilde{C}_{1, t}^{(k)}(\mu_p) \right\}$, and if we know every $C_{1, t}^{(k)}(\mu_p)$ at step $t$ for all $p< P$, we straightfowardly get $C_{1, t}^{(k)}$ in $\mathcal{O}(p)$. As $\widetilde{C}_{t_1, t_2} (\mu)$ is point additive 
 updating $\widetilde{C}_{t_1, t_2} (\mu)$ is easy and can be done efficiently using the following theorem.
 
@@ -164,26 +148,23 @@ $ \widetilde{C}_{1, t+1}^{(k)}(\mu) = \min \left\{ \widetilde{C}_{1, t}^{(k)}(\m
 
 \paragraph{Proof. } Let us first notice that: 
 $ \widetilde{C}_{1, t+1}^{(k)}(\mu) =  \underset{{\tau < t+1} }{\min}\left\{  \widetilde{C}_{(1,\tau)}^{(k-1)}  +  \widetilde{C}_{(\tau+1, t)}^{(1)}(\mu) \right\}
-$
-and that $\widetilde{C}_{1, t}^{(k)}(\mu) =\underset{{\tau < t} }{\min}\{  \widetilde{C}_{(1,\tau)}^{(k-1)} \}$
-%From this and using the point additivness of $ C_{(\tau+1, t+1)}^{(1)}(\mu)$ we get that:
-%\begin{eqnarray*}
-% \widetilde{C}_{1, t+1}^{(k)}(\mu) = & \min \left\{ \ \underset{{\tau < t}}{\min} \left(  \widetilde{C}_{(1,\tau)}^{(k-1)}  +  \widetilde{C}_{(\tau+1, t)}^{(1)}(\mu) \right), \quad  \widetilde{C}_{(1,t)}^{(k-1)}  \right\} +  \ \widetilde{C}_{(t+1, t+1)}^{(1)}(\mu).
-%\end{eqnarray*}
+.$
+From this and using the point additivness of $ C_{(\tau+1, t+1)}^{(1)}(\mu)$ we get that:
+\begin{eqnarray*}
+ \widetilde{C}_{1, t+1}^{(k)}(\mu) = & \min \left\{ \ \underset{{\tau < t}}{\min} \left(  \widetilde{C}_{(1,\tau)}^{(k-1)}  +  \widetilde{C}_{(\tau+1, t)}^{(1)}(\mu) \right), \quad  \widetilde{C}_{(1,t)}^{(k-1)}  \right\} +  \ \widetilde{C}_{(t+1, t+1)}^{(1)}(\mu).
+\end{eqnarray*}
 \noindent From this the theorem follows. $\blacksquare$ \\
 
 Using this theorem, knowing $C_{1, t}^{(k)}(\mu)$ and $C_{1, t}^{(k-1)}$ we get $C_{1, t+1}^{(k)}(\mu)$ in $\mathcal{O}(1)$
 and we derive Algorithm \ref{algo:DPALinear} for the DP step of the DP-EM algorithm \cite{picard_2007}. For simplicity we did not include the initialization of $C^{(1)}_{1,t}$ for $t < n$ and $C^{(k)}_{1,1}(\mu_p)$.
-All $C^{(k)}_{1,1}(\mu_p)$ are initialized as $+\infty$ and $C^{(1)}_{1,t}$ are initialized using their definition.
-
-At step $k, t$ of Algorithm \ref{algo:DPALinear}  $\mathcal{O}(P)$ basic operations are performed. If we sum these for all $k < K$ and $t < n$  we straighfowardly see that the algorithm has an $\mathcal{O}(KPn)$ time complexity.
+All $C^{(k)}_{1,1}(\mu_p)$ are initialized as $+\infty$ and $C^{(1)}_{1,t}$ are initialized using their definition. At step $k, t$ of Algorithm \ref{algo:DPALinear}  $\mathcal{O}(P)$ basic operations are performed. If we sum these for all $k < K$ and $t < n$  we straighfowardly see that the algorithm has an $\mathcal{O}(KPn)$ time complexity.
 \begin{algorithm}
 \begin{algorithmic}
 \caption{Linear DP algorithm for the classification cost}\label{algo:DPALinear}
     \State \textbf{Input}: $Y(t)$ a profile of $n$ observations, $K$ an integer 
- \State \textbf{Input}: $C_{ij}$ cost of the segments $\rrbracket I, j \rrbracket$  for all $(i, j) \in \llbracket1, n \rrbracket^2$
-   \State \textbf{Output}: $C^{(k)}_{1,t}$ in $\mathbb{R}$ for all $k \leq K$ and $t \leq n$ 
-    \State $M^{(k)}_{1,t}$ in $\mathbb{N}$ for all $k \leq K$ and $t \leq n$ 
+ \State \textbf{Input}: $C_{t_1,t_2}$ cost of the segments $\rrbracket t_1, t_2 \rrbracket$  for all $(t_1, t_2) \in \llbracket1, n \rrbracket^2$
+   \State \textbf{Output}: $C^{(k)}_{1,t}$ in $\mathbb{R}$ and $M^{(k)}_{1,t}$ in $\mathbb{N}$ for all $k \leq K$ and $t \leq n$ 
+%    \State $M^{(k)}_{1,t}$ in $\mathbb{N}$ for all $k \leq K$ and $t \leq n$ 
    %& $M^{(k)}_{1,t}$ in $\mathbb{N}$ for all $k \times K$ and $t \leq n$ \\
   %  \textbf{Initialize}& \\
   % & \textbf{For} $t \in \llbracket 1, n \rrbracket$ \\
@@ -209,7 +190,7 @@ At step $k, t$ of Algorithm \ref{algo:DPALinear}  $\mathcal{O}(P)$ basic operati
 Using the approximation defined in Equation \ref{Eq:approx} we can guarantee the quality of the obtained segmentation using the following theorem.
 \begin{theo}
 Using approximation defined in Equation \ref{Eq:approx} we have for all segments $R$ and $K$
-$$ \widetilde{C}_{(R)}^{(K)} - K \log(p) 
+$$\widetilde{C}_{(R)}^{(K)} - K \log(p) 
 \ \leq \ 
 \underset{r \in \widehat{m}_{(R)}^{(K)}}{\operatorname{\sum}} \widetilde{C}_{(R)}^{(K)} - K \log(p) 
 \ \leq \ 
@@ -217,38 +198,28 @@ $$ \widetilde{C}_{(R)}^{(K)} - K \log(p)
 \ \leq \ 
 \underset{r \in \widetilde{m}_{(R)}^{(K)}}{\operatorname{\sum}} {C}_{(R)}^{(K)} 
 \ \leq \ 
-\widetilde{C}_{(R)}^{(K)} $$
+\widetilde{C}_{(R)}^{(K)}.$$
 \label{theo:theoapprox}
 \end{theo}
-
-\paragraph{Proof.} 
-%We can always write:
-%$$ {C}_{(r)}^{(1)} = \widetilde{C}_{(r)}^{(1)} - \log\left(\sum_p \pi_p \exp \left\{ -{\sum_{t \in r} (y(t)- \mu_p)^2 }/{ 2 \sigma^2} +\widetilde{C}_{(r)}^{(1)} \right\}\right)$$
-%Moreover we have:
-%$$-\log(p) \ \leq \ 
-%- \log\left(\sum_p \pi_p \exp \left\{ -{\sum_{t \in r} (y(t) - \mu_p)^2 }/{ 2 \sigma^2} +\widetilde{C}_{(r)}^{(1)} \right\}\right)
-%\ \leq \  
-%0$$
-Using the definition of $\widetilde{C}_{(r)}^{(1)}$ we have that for all $p$ and $r$
-
-$  \sum_{t \in r}{(y(t) - \mu_p)^2} /{2\sigma^2 } + \log(\pi_p) \leq  \widetilde{C}_{(r)}^{(1)}.$
-Using this we get:
-\begin{eqnarray}
-\forall r,  \quad \widetilde{C}_{(r)}^{(1)} -\log(p) \leq {C}_{(r)}^{(1)} \leq \widetilde{C}_{(r)}^{(1)} \label{equation:bound1}.
-\end{eqnarray}
-Using Equation (\ref{equation:bound1}) and the definition of ${C}_{(R)}^{(K)}$ we get that, 
-\begin{eqnarray} 
-\forall m \in \mathcal{M}^{(K)}_{(R)}, \qquad
-\widetilde{C}_{(R)}^{(K)} - K\log(p) \leq \sum_{r \in m} \widetilde{C}_{(r)}^{(1)} - K \log(p) \leq   \sum_{r \in m} {C}_{(r)}^{(1)} .
-\label{equation:boundproof1}\end{eqnarray}
+\vspace{-1cm}
+\noindent $$\text{\textit{Proof.} Since } {C}_{(r)}^{(1)} = \widetilde{C}_{(r)}^{(1)} - \log\left(\sum_p \pi_p \exp \left\{ -\sum_{t \in r} (y(t)- \mu_p)^2 / 2 \sigma^2 +\widetilde{C}_{(r)}^{(1)} \right\}\right),$$
+$$\text{and }-\log(p) \ \leq \ - \log\left(\sum_p \pi_p \exp \left\{ -\sum_{t \in r} (y(t) - \mu_p)^2 / 2 \sigma^2 +\widetilde{C}_{(r)}^{(1)} \right\}\right)\ \leq \  
+0,$$ we have: $\forall r,\, \widetilde{C}_{(r)}^{(1)} -\log(p) \leq {C}_{(r)}^{(1)} \leq \widetilde{C}_{(r)}^{(1)} \label{equation:bound1}$, which gives, along with the definition of ${C}_{(R)}^{(K)}$: 
+%\begin{eqnarray} 
+$
+\forall m \in \mathcal{M}^{(K)}_{(R)}, \,
+\widetilde{C}_{(R)}^{(K)} - K\log(p) \leq \sum_{r \in m} \widetilde{C}_{(r)}^{(1)} - K \log(p) \leq   \sum_{r \in m} {C}_{(r)}^{(1)} (2).
+\label{equation:boundproof1}
+$
+%\end{eqnarray}
 Similarly we get:
-\begin{eqnarray} 
-\forall m \in \mathcal{M}^{(K)}_{(R)}, \qquad
-{C}_{(R)}^{(K)} \leq \sum_{r \in m} {C}_{(r)}^{(1)} \leq   \sum_{r \in m} \widetilde{C}_{(r)}^{(1)} .
-\label{equation:boundproof2}\end{eqnarray}
-
-Applying Equation (\ref{equation:boundproof1}) to $m = \widehat{m}_{t_1, t_2}^{(K)}$ and then Equation (\ref{equation:boundproof2})
-to $m =  \widetilde{m}_{t_1, t_2}^{(K)}$ we get the theorem. $\blacksquare$
+%\begin{eqnarray} 
+$
+\forall m \in \mathcal{M}^{(K)}_{(R)}, \, {C}_{(R)}^{(K)} \leq \sum_{r \in m} {C}_{(r)}^{(1)} \leq   \sum_{r \in m} \widetilde{C}_{(r)}^{(1)} (3).
+\label{equation:boundproof2}
+%\end{eqnarray}
+$
+Applying Equation (2) to $m = \widehat{m}_{t_1, t_2}^{(K)}$ and then Equation (3) to $m =  \widetilde{m}_{t_1, t_2}^{(K)}$ we get the theorem. $\blacksquare$
 
 \section{Joint Segmentation and Parallelization of the algorithm}
 
@@ -258,20 +229,18 @@ $$
 $$
 where ${r_k^i}$ stands for segment $k$ of profile $i$, and where $b(t)$ is a bias function that depends on the position (like the wave effect \cite{PLH11}). Then the segmentation of profile $i$ into $K_i$ segments is denoted by $m_{i}^{K_i}=\{r_1^i,...r_{K_i}^i\}$, and the $global$ segmentation into $K$ segments is denoted by $m_K=\{m_1^{K_1}, ..., m_{I}^{K_I}\}$, with $K=\sum_{i=1}^I K_i$.
 
-Joint segmentation presents an additional algorithmic challenge. When each $K_i$ is known, the best segmentation for each profile $\widehat{m}_{i}^{K_i}$ can be found independently and therefore computed in parallel with the linearized version of the Dynamic Programming algorithm. Then the additional step, which remains sequential, is to determine the combination of $\{\widehat{K}_i\}$ that provide the best joint segmentation \cite{PLH11}. Dynamic Programming has been shown to be efficient to provide an exact solution to this problem in $\mathcal{O}(I^3 K_{\max}^2)$, where $K_{\max}$ is the maximum number of segments to be put in each profile. 
-
-
-
+Joint segmentation presents an additional algorithmic challenge. When each $K_i$ is known, the best segmentation for each profile $\widehat{m}_{i}^{K_i}$ can be found independently and therefore computed in parallel using Agorithm 1 or 2. Then the additional step, which remains sequential, is to determine $i)$ the common parameters across profiles ($\{\mu_p\}, b(t)$) and $ii)$ the combination of $\{\widehat{K}_i\}$ that provides the best joint segmentation \cite{PLH11}. Dynamic Programming has also been shown to provide an exact solution to problem $ii)$ in $\mathcal{O}(I^3 K_{\max}^2)$, where $K_{\max}$ is the maximum number of segments to be put in each profile. Consequently, joint segmentation computing alternates between parallel and sequential parts, as shown in Algorithm \ref{algo:parallelDP}.
 \begin{algorithm}
 \begin{algorithmic}
 \caption{Parallel Algorithm for Joint segmentation}\label{algo:parallelDP}
-\State \textbf{Input}: $\{Y_i(t)\}$, $I$ profiles of $n$ observations, $K$ an integer 
-\State \textbf{Input}: $C_{ij}$ cost of the segments $\rrbracket i, j \rrbracket$  for all $(i, j) \in \llbracket1, n \rrbracket^2$
-\State \textbf{Output}:  $\{\widehat{K}_1,..., \widehat{K}_I\}$, $C^{(\widehat{K}_i)}_{1,t}$ in $\mathbb{R}$ for all $i \leq I$, $k \leq K_i$ and $t \leq n$ 
+\State \textbf{Input}: $\{Y_i(t)\}$, $I$ profiles of $n$ observations, $K$ an integer, $\{\widehat{\mu}_p^0\}$ starting values for common parameters
+\State \textbf{Input}: $C_{t_1,t_2}^i$ cost of the segments $\rrbracket t_1, t_2 \rrbracket$ for profile $i$ for all $(t_1, t_2) \in \llbracket1, n \rrbracket^2$
+\State \textbf{Output}: $\{\widehat{K}_1,..., \widehat{K}_I\}$, $C^{(\widehat{K}_i)}_{1,t}$ in $\mathbb{R}$ for all $i \leq I$, $k \leq K_i$ and $t \leq n$, $\{\widehat{\mu}_p\}$, $\widehat{b}(t)$ 
 \While{not convergence}
 \For{$i \in \{1,...I\}$} {\bf in parallel}
 \State compute $C^{(k)}_{1,t}$  $\forall k \leq K$ and $t \leq n$ with Algorithm \ref{algo:DPALinear}
 \EndFor
+\State update $\{\widehat{\mu}_p\}, \widehat{b}(t)$
 \State compute $\{\widehat{K}_1,..., \widehat{K}_I\}$ with {\bf sequential} DP \cite{PLH11}
 \EndWhile
   \end{algorithmic}
@@ -279,21 +248,13 @@ Joint segmentation presents an additional algorithmic challenge. When each $K_i$
 
 \section{Computational footprint and scalability}
 
-All the presented algorithms are available into the \texttt{R} package \soft \footnote{\url{http://cran.r-project.org/web/packages/cghseg}}, which now relies on the \texttt{R} package \texttt{parallel} and on the shared memory programming standard \texttt{openMP} in the \texttt{C++} sections. The new package is now designed to be executed in parallel on multiprocessor architectures.
+All the presented algorithms are available into the \esoft \texttt{R}-package\footnote{\url{http://cran.r-project.org/web/packages/cghseg}} , which now relies on the \texttt{parallel} \texttt{R}-package and on the shared memory programming standard \texttt{openMP} in the \texttt{C++} sections. The new package is now designed to be executed in parallel on multiprocessor architectures. 
 
+We recall that the statistical performance of the model have been discussed elsewhere \cite{PLH11}, so that our focus here is computational only. Consequently, we use a previously published simulation scheme to generate the data \cite{POA09,PLH11} with $n=20,000$ observations per profile, and a number of profiles varying in $I \in \{256,512,1024\}$. The average number of segments is set to 10 for each profile, and the Signal to Noise Ratio is set to 5 (which corresponds to  moderately easy configurations). 
 
-The software design take advantage of multiprocessing to treat the profiles in parallel at every step of the algorithm.
-To assess the quality of the parallel implementation, we developed a simulation scheme to analyze the \esoft execution time 
-with varying number of profiles and number of available CPU units (cores).
-We simulated $256, 512$ and $1024$ profiles of length $20,000$ with k.mean=10,SNR=5,lambda=10 and we ran \esoft on up to $48$ cores.
-We observed a relative speedup decrease (see Fig.\ref{figspeedup}) with the number of cores and profiles. Indeed, the lower is the number of profiles the less time consuming is the sequential part compared with the parallel part (see Algorithm \ref{algo:parallelDP}). Meanwhile, when the datasets comes large in the number of profiles, the speedup better follows the Amdahl's law that predicts the theoretical maximum speedup (see dashed lines Fig.\ref{figspeedup}, ref???): the Amdahl's law established that the speedup follows $1/(\alpha+(1-\alpha)/p)$ where $\alpha$ is the time proportion of the sequential part and $p$ the number of cores. We deduced that some overhead due to the mechanisms that launch the parallel sections (mainly in the \texttt{R} package \texttt{parallel}) comes to be less negligible when the datasets are not large enough, but also that the quality of the implementation is therefore demonstrated especially for large datasets.
+We first check that the linearization approximations (with and without calling) give the same statistical performance (Tab. \ref{Tab:stat}), which means that our new package keeps the same results quality as the older version. Then we assess the quality of the parallel implementation by running \texttt{cghseg} on an increasing number of cores $\{1,2,4,16,32,48\}$. When dealing with parallelized codes, the Amdahl's law \cite{AG67} provides the expected theoretical speedup with respect to the time proportion of the sequential part and the number of cores. The speedup of \texttt{cghseg} exactly follows the Amdahl's law when the number of profiles is high (Fig.\ref{figspeedup}, dashed lines), which demonstrates the quality of our implementation as the Amdahl's law constitutes the best possible speedup. However, we observe a moderate speedup decrease for a lower number of profiles. This is due to the the sequential part which is relatively more time consuming compared with the parallel part when the number of profiles is low (see Algorithm (\ref{algo:parallelDP})). Consequently, this moderate decrease for a low number of profiles is mainly due to overheads associated with the use of the \texttt{parallel} \texttt{R}-package, overheads that become negligible when the number of profiles is high. Nevertheless, the speed of execution of configurations with $I=256$ profiles where 6 minutes on average using 48 cores, which remains excellent. 
 
-While the main interest of \esoft is the quality of its results, the associated computational expense is affordable even
-for very large datasets. As a benchmark, we simulated datasets with $1024$ profiles of length $100,000$ with k.mean=10,SNR=5,lambda=10. This corresponds to the up-tu-date limits of the available datasets??????
-\esoft required $453$ minutes of calculation on average, corresponding to about $4$ hours elapsed time on a $48$ cores (see Table \ref{tabtime}).
-In addition, due to the {\it copy-on-write} mechanism (ref?) of the \texttt{R} package \texttt{parallel} that avoid memory copy between processes, and thanks to the shared memory efficiency assessed with \texttt{openMP}, the memory needs are reasonnable (see Table \ref{tabtime}). Indeed, the only amount of required memory mainly corresponds to the profile dataset.
-Therefore, our method and software package are adapated to the next generation of computers (many cores) and experiments (large profiles).
-
+While the main interest of \esoft is the quality of its results, the associated computational expense is affordable even for very large datasets. As a benchmark, we simulated datasets with $1024$ profiles of length $100,000$ with which corresponds to the up-tu-date limits of the available datasets of SNP-arrays for instance. \esoft required 4h on average on a $48$ cores (see Table \ref{tabtime}). In addition, due to the {\it copy-on-write} mechanism  of the \texttt{parallel} \texttt{R}-package  that avoids memory copy between processes, and thanks to the shared memory efficiency provided by \texttt{openMP}, the memory needs only correspond to the profile dataset (see Table \ref{tabtime}). Therefore, our method and software package are adapated to the next generation of computers (many cores) and experiments (large profiles).
 
 \begin{table}[ht]
 \begin{center}
@@ -312,12 +273,13 @@ SNR  &  $\text{CI}_{\text{new}}(\widehat{\text{K}})$ & $\text{CI}_{\text{old}}(\
 \end{tabular}
 \end{small}
 \end{center}
-\caption{Performance comparison between the non linearized and non parallel (``old'') and the linearized-parallel (``new'') version. Confidence intervals are given over 50 replicates for each simulated configuration. Statistical performance is assessed through the precision of the estimation of the number of segments $\hat{K}$, the precision of the estimators of the mean level of each segment ($\hat{\mu}$), the False Discovery and False Negative Rates for breakpoint detection.} 
+\caption{Performance comparison between the non linearized and non parallel (``old'') and the linearized-parallel (``new'') version. Confidence intervals are given over 50 replicates. Statistical performance is assessed through the precision of the estimation of the number of segments $\hat{K}$ and of the mean level of each segment ($\hat{\mu}$), the False Discovery and False Negative Rates for breakpoint detection.\label{Tab:stat}} 
 \end{table}
+
 \begin{figure}[h!]
   \begin{center}
-    \includegraphics[height=5cm]{figures/speedup}
-    \caption{Average speedup of \esoft observed  on simulated datasets for a varying number of profiles and available core (plain lines). Amdahl's law is empirically adjusted to the computing results with $256,512$ and $1024$ profiles (dashed lines, with $\alpha=0.2,1.2,4.5\%$ respectively). Notice that we ran 5 times each simulation and averaged the results. Run on a quadri-12 cores Opteron 2.2 GHz, 256 Gb RAM.}
+    \includegraphics[scale=0.4,angle=270]{figures/speedup.ps}
+    \caption{Average speedup of \esoft observed  on simulated datasets for a varying number of profiles and available cores (plain lines). Amdahl's law is empirically adjusted to the computing results with $256,512$ and $1024$ profiles (dashed lines, with $\alpha=0.2,1.2,4.5\%$ respectively). The theoretical speedup is given by $1/(\alpha+(1-\alpha)/c)$, where $\alpha$ is the time proportion of the sequential part and $c$ the number of cores. Points correspond to averages over 5 replicates. Run on a quadri-12 cores Opteron 2.2 GHz, 256 Gb RAM.}
     \label{figspeedup}
   \end{center}
 \end{figure}
@@ -339,7 +301,7 @@ SNR  &  $\text{CI}_{\text{new}}(\widehat{\text{K}})$ & $\text{CI}_{\text{old}}(\
       \hline
     \end{tabular}
     %}
-    \caption{Average computational requirements of \esoft estimated on simulated datasets for a varying number of profiles and observations, computed on $48$ cores. Notice that we ran 5 times each simulation and averaged the results. Run on a quadri-12 cores Opteron 2.2 GHz, 256 Gb RAM.}
+    \caption{Average computational requirements of \esoft estimated on simulated datasets for a varying number of profiles and observations, computed on $48$ cores. Results correspond to averages over 5 replicates. Run on a quadri-12 cores Opteron 2.2 GHz, 256 Gb RAM.}
     \label{tabtime}
   \end{center}
 \end{table}
