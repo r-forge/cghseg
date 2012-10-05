@@ -205,15 +205,18 @@ $$\widetilde{C}_{(R)}^{(K)} - K \log(p)
 \label{theo:theoapprox}
 \end{theo}
 \vspace{-1cm}
-\noindent $$\text{\textit{Proof.} Since } {C}_{(r)}^{(1)} = \widetilde{C}_{(r)}^{(1)} - \log\left(\sum_p \pi_p \exp \left\{ -\sum_{t \in r} (y(t)- \mu_p)^2 / 2 \sigma^2 +\widetilde{C}_{(r)}^{(1)} \right\}\right),$$
-$$\text{and }-\log(p) \ \leq \ - \log\left(\sum_p \pi_p \exp \left\{ -\sum_{t \in r} (y(t) - \mu_p)^2 / 2 \sigma^2 +\widetilde{C}_{(r)}^{(1)} \right\}\right)\ \leq \  
-0,$$ we have: $\forall r,\, \widetilde{C}_{(r)}^{(1)} -\log(p) \leq {C}_{(r)}^{(1)} \leq \widetilde{C}_{(r)}^{(1)} \label{equation:bound1}$, which gives, along with the definition of ${C}_{(R)}^{(K)}$: 
+\noindent {\textit{Proof.} 
+We have ${C}_{(r)}^{(1)} = -log(\sum_p \exp \{-\widetilde{C}_{(r)}^{(1)}(\mu_p) \})$ and  $ \widetilde{C}_{(r)}^{(1)} \geq \widetilde{C}_{(r)}^{(1)}(\mu_p)$
+%Since $$ {C}_{(r)}^{(1)} = \widetilde{C}_{(r)}^{(1)} - \log\left(\sum_p \pi_p \exp \left\{ -\sum_{t \in r} (y(t)- \mu_%p)^2 / 2 \sigma^2 +\widetilde{C}_{(r)}^{(1)} \right\}\right),$$
+%$$\text{and }-\log(p) \ \leq \ - \log\left(\sum_p \pi_p \exp \left\{ -\sum_{t \in r} (y(t) - \mu_p)^2 / 2 \sigma^2 +\w%idetilde{C}_{(r)}^{(1)} \right\}\right)\ \leq \  
+%0,$$
+From this we get that : $\forall r,\, \widetilde{C}_{(r)}^{(1)} -\log(p) \leq {C}_{(r)}^{(1)} \leq \widetilde{C}_{(r)}^{(1)} \label{equation:bound1}$, which gives, along with the definition of ${C}_{(R)}^{(K)}$: 
 %\begin{eqnarray} 
-$
+$$
 \forall m \in \mathcal{M}^{(K)}_{(R)}, \,
 \widetilde{C}_{(R)}^{(K)} - K\log(p) \leq \sum_{r \in m} \widetilde{C}_{(r)}^{(1)} - K \log(p) \leq   \sum_{r \in m} {C}_{(r)}^{(1)} (2).
 \label{equation:boundproof1}
-$
+$$
 %\end{eqnarray}
 Similarly we get:
 %\begin{eqnarray} 
