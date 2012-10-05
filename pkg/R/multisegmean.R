@@ -66,7 +66,7 @@ setMethod(f = "multisegmean",signature = "CGHdata",
 								getmBIC(K,multiloglik[K-M+1],mu,CGHo)     
 							})
 				} else{
-					mBIC = pvec(Kseq,FUN=function(K){
+					mBIC = mclapply(Kseq,FUN=function(K){
 								mu      = multisegout(.Object,seg.rep,Res,K)
 								getmBIC(K,multiloglik[K-M+1],mu,CGHo)     
 							}, mc.cores = CGHo@nbprocs)
