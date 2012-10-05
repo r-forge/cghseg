@@ -74,7 +74,7 @@ The purpose of segmentation is to partition a signal of $n$ observations $\{Y(t)
 
 A standard statistical model for segmentation is the detection of changes in the mean of a signal, such that $\forall t \in r_k, \,\, Y(t)\sim \mathcal{N}(\mu_k,\sigma^2).$ In the special case of array CGH, an additional step is the ``calling step'' that is performed by introducing additional (hidden) label variables $\{C(r_k)\}_k$ to cluster each segment into categories such as \texttt{deleted}, \texttt{normal}, \texttt{amplified} (not limited to 3 states). Then the segmentation/clustering model becomes (for fixed $P$ and $p=1,...P$):  $$\forall t \in r_k, \,\, Y(t)|\{C(r_k)=p\} \sim \mathcal{N}(\mu_p,\sigma^2).$$
 
-Once the statistical model has been defined, the main algorithmic challenge lies in the exact detertination of the boundaries of segments $\{\tau_k\}$ (and not in the estimation of mean parameters $\mu_k$s or $\mu_p$s depending on the model). A well known solution to this problem is to use Dynamic Programming for a given number of segments $K$ to find the best $global$ segmentation in terms of ``cost'' (to be defined). In this work, we do not deal with the issue of model selection to estimate $K$ and $P$, discussed elsewhere \cite{picard_statistical_2005,ZS07}. To perform Dynamic Programming, we need to define the ``unit'' cost of a generic segment $r = \llbracket t_1, t_2 \rrbracket$, which is given by minus the local log-likelihood calculated on $r$:
+Once the statistical model has been defined, the main algorithmic challenge lies in the exact determination of the boundaries of segments $\{\tau_k\}$ (and not in the estimation of mean parameters $\mu_k$s or $\mu_p$s depending on the model). A well known solution to this problem is to use Dynamic Programming for a given number of segments $K$ to find the best $global$ segmentation in terms of ``cost'' (to be defined). In this work, we do not deal with the issue of model selection to estimate $K$ and $P$, discussed elsewhere \cite{picard_statistical_2005,ZS07}. To perform Dynamic Programming, we need to define the ``unit'' cost of a generic segment $r = \llbracket t_1, t_2 \rrbracket$, which is given by minus the local log-likelihood calculated on $r$:
 $$ C_{(r)}^{(1)} = 
 \begin{cases}
 \sum_{t \in r} (y(t) - \mu_r)^2/2 \sigma^2 \text{, for segmentation in the mean}  \\
@@ -149,15 +149,18 @@ $ \widetilde{C}_{1, t+1}^{(k)}(\mu) = \min \left\{ \widetilde{C}_{1, t}^{(k)}(\m
 \paragraph{Proof. } Let us first notice that: 
 $ \widetilde{C}_{1, t+1}^{(k)}(\mu) =  \underset{{\tau < t+1} }{\min}\left\{  \widetilde{C}_{(1,\tau)}^{(k-1)}  +  \widetilde{C}_{(\tau+1, t)}^{(1)}(\mu) \right\}
 .$
-From this and using the point additivness of $ C_{(\tau+1, t+1)}^{(1)}(\mu)$ we get that:
-\begin{eqnarray*}
- \widetilde{C}_{1, t+1}^{(k)}(\mu) = & \min \left\{ \ \underset{{\tau < t}}{\min} \left(  \widetilde{C}_{(1,\tau)}^{(k-1)}  +  \widetilde{C}_{(\tau+1, t)}^{(1)}(\mu) \right), \quad  \widetilde{C}_{(1,t)}^{(k-1)}  \right\} +  \ \widetilde{C}_{(t+1, t+1)}^{(1)}(\mu).
-\end{eqnarray*}
+Using the defintion of $\widetilde{C}_{1, t}^{(k)}(\mu) $ we get that:
+
+$$ \widetilde{C}_{1, t}^{(k)}(\mu) + \widetilde{C}_{(t+1, t+1)}^{(1)}(\mu)=
+ \underset{{\tau < t}}{\min} \left(  \widetilde{C}_{(1,\tau)}^{(k-1)} \right) + \widetilde{C}_{(t+1, t+1)}^{(1)}(\mu)$$
+%\begin{eqnarray*}
+% \widetilde{C}_{1, t+1}^{(k)}(\mu) = & \min \left\{ \ \underset{{\tau < t}}{\min} \left(  \widetilde{C}_{(1,\tau)}^{(k-1)}  +  \widetilde{C}_{(\tau+1, t)}^{(1)}(\mu) \right), \quad  \widetilde{C}_{(1,t)}^{(k-1)}  \right\} +  \ \widetilde{C}_{(t+1, t+1)}^{(1)}(\mu).
+%\end{eqnarray*}
 \noindent From this the theorem follows. $\blacksquare$ \\
 
-Using this theorem, knowing $C_{1, t}^{(k)}(\mu)$ and $C_{1, t}^{(k-1)}$ we get $C_{1, t+1}^{(k)}(\mu)$ in $\mathcal{O}(1)$
-and we derive Algorithm \ref{algo:DPALinear} for the DP step of the DP-EM algorithm \cite{picard_2007}. For simplicity we did not include the initialization of $C^{(1)}_{1,t}$ for $t < n$ and $C^{(k)}_{1,1}(\mu_p)$.
-All $C^{(k)}_{1,1}(\mu_p)$ are initialized as $+\infty$ and $C^{(1)}_{1,t}$ are initialized using their definition. At step $k, t$ of Algorithm \ref{algo:DPALinear}  $\mathcal{O}(P)$ basic operations are performed. If we sum these for all $k < K$ and $t < n$  we straighfowardly see that the algorithm has an $\mathcal{O}(KPn)$ time complexity.
+Using this theorem, knowing $\widetilde{C}_{1, t}^{(k)}(\mu)$ and $\widetilde{C}_{1, t}^{(k-1)}$ we get $\widetilde{C}_{1, t+1}^{(k)}(\mu)$ in $\mathcal{O}(1)$
+and we derive Algorithm \ref{algo:DPALinear} for the DP step of the DP-EM algorithm \cite{picard_2007}. For simplicity we did not include the initialization of $\widetilde{C}^{(1)}_{1,t}$ for $t < n$ and $\widetilde{C}^{(k)}_{1,1}(\mu_p)$.
+All $\widetilde{C}^{(k)}_{1,1}(\mu_p)$ are initialized as $+\infty$ and $\widetilde{C}^{(1)}_{1,t}$ are initialized using their definition. At step $k, t$ of Algorithm \ref{algo:DPALinear}  $\mathcal{O}(P)$ basic operations are performed. If we sum these for all $k < K$ and $t < n$  we straighfowardly see that the algorithm has an $\mathcal{O}(KPn)$ time complexity.
 \begin{algorithm}
 \begin{algorithmic}
 \caption{Linear DP algorithm for the classification cost}\label{algo:DPALinear}
