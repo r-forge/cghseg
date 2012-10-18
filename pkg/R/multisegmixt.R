@@ -8,7 +8,7 @@ setMethod(f = "multisegmixt",signature = "CGHdata",
 
 ######   Individual segmentations for patients 
 			if (CGHo@nbprocs>1){		
-				cat("multisegmixt //                         \r")	
+				#cat("multisegmixt //                         \r")	
 				if (Sys.info()["sysname"] == "Windows"){ 				
 					unisegmixt.proxy <- function(m){
 						n     = length(which(!is.na(Y.ref[[m]])))
@@ -36,7 +36,7 @@ setMethod(f = "multisegmixt",signature = "CGHdata",
 				}
 			}
 			else{	
-				cat("multisegmixt                            \r")	
+				#cat("multisegmixt                            \r")	
 				Res = lapply(names(.Object@Y), FUN = function(m){
 							n     = length(which(!is.na(.Object@Y[[m]])))
 							Kmax  = uniKmax[[m]]
@@ -48,7 +48,7 @@ setMethod(f = "multisegmixt",signature = "CGHdata",
 			}
   
 ######   Segment Repartition segments across patients 
-			cat("multisegmixt finishing                  \r")
+			#cat("multisegmixt finishing                  \r")
       
             J.est              = lapply(Res,FUN = function(x){x$J.est})
             nbdata             = lapply(.Object@Y,FUN = function(y){length(y[!is.na(y)])}) 
@@ -63,7 +63,7 @@ setMethod(f = "multisegmixt",signature = "CGHdata",
             multiKselect    = multiKmax  
             mu              = multisegout(.Object,seg.rep,Res,multiKselect)
             select(CGHo)    = select.tmp
-			cat("multisegmixt finished                   \r")             
+			#cat("multisegmixt finished                   \r")             
             invisible(list(mu=mu,loglik = multiloglik[length(multiloglik)],nbiter=0)) 
           }
           )

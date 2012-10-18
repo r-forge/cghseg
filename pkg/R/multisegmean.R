@@ -9,7 +9,7 @@ setMethod(f = "multisegmean",signature = "CGHdata",
             
 ######   Individual segmentations for patients 
             if (CGHo@nbprocs>1){           
-				cat("multisegmean //               \r")	
+				#cat("multisegmean //               \r")	
 				if (Sys.info()["sysname"] == "Windows"){   			
 					unisegmean.proxy <- function(m){
 						n                           = length(which(!is.na(Y.ref[[m]])))
@@ -59,7 +59,7 @@ setMethod(f = "multisegmean",signature = "CGHdata",
               dimll        = length(multiloglik)
             } else if (select.tmp=="mBIC"){
               if (CGHo@nbprocs>1){	
-                cat("multisegmean // part 2                  \r")
+                #cat("multisegmean // part 2                  \r")
 				if (Sys.info()["sysname"] == "Windows"){ 				
 					mBIC = parSapply(CGHo@cluster, Kseq, FUN=function(K){
 								mu      = multisegout(.Object,seg.rep,Res,K)
@@ -85,9 +85,9 @@ setMethod(f = "multisegmean",signature = "CGHdata",
             
             mu           = multisegout(.Object,seg.rep,Res,multiKselect)
             select(CGHo) = select.tmp  
-			if (CGHo@nbprocs>1){	
-				cat("multisegmean finished                  \r") 
-			}
+#			if (CGHo@nbprocs>1){	
+#				cat("multisegmean finished                  \r") 
+#			}
             invisible(list(mu=mu,loglik=multiloglik[dimll],nbiter=0))
           } 
           )

@@ -55,34 +55,7 @@ namespace cghseg
     Dtmp(i)        = -nk(i)*vk(i)-ntmp*vtmp+ (nk(i)+ntmp)*varpool;
   }
 
-  void compactEM_init::CAHmin(int k, int& imin, int& jmin, double& dmin){    
-    /*
-    dmin = std::numeric_limits<double>::max();
-    for (int i=2; i<k+1 ; i++){
-      for (int j=1; j<i ; j++){
-	if (Dist(i,j)<=dmin){
-	  dmin = Dist(i,j); 
-	  imin = i; 
-	  jmin = j;
-	}
-      }
-    }
-    std::cerr<<dmin<<" "<<imin<<" "<<jmin<<std::endl;
-    
-    dmin = std::numeric_limits<double>::max();
-    double * ptrD = &Dist(2,1);    
-    for (int i=2; i<k+1 ; i++){
-      for (int j=1; j<i ; j++){	
-	if (*ptrD<=dmin){
-	  dmin = *ptrD; 
-	  imin = i; 
-	  jmin = j;
-	}
-	ptrD++;	
-      }
-    }
-    std::cerr<<dmin<<" "<<imin<<" "<<jmin<<std::endl;
-    */
+  void compactEM_init::CAHmin(int k, int& imin, int& jmin, double& dmin){
     int nbD = ((k-1)*k)/2; // 1 -> _K-1 elements 
     int iimin;    
     int iimin_shared;
