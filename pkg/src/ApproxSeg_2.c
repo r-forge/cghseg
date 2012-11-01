@@ -1,8 +1,4 @@
-#include <R.h>
-#include <Rinternals.h>
-#include <gsl/gsl_math.h>
-
-#define NUMLIB_POSINF GSL_POSINF
+#include "ApproxSeg.h"
 
 void ClassiSegProba(double *sequence, int *lgSeq, int *nStep, double *res1, int *res2, int *nbClasse, 
 			   double *moyennes, double *logP, double *variance_){
@@ -23,12 +19,12 @@ void ClassiSegProba(double *sequence, int *lgSeq, int *nStep, double *res1, int 
 
   for(i = 0; i < *lgSeq; i++)
    for(k= 0; k < *nStep; k++) 
-     res1[(*lgSeq)*k+i] = NUMLIB_POSINF;
+     res1[(*lgSeq)*k+i] = A_POSINF;
 
   /* intialisation */
   for(i =0; i < *lgSeq; i++)
   {
-    min=NUMLIB_POSINF;
+    min=A_POSINF;
     for(l =0; l < *nbClasse; l++)
     {		
       vTmp[l] = vTmp[l] + (sequence[i] - moyennes[l])*(sequence[i] - moyennes[l]) / variance;	   
@@ -41,12 +37,12 @@ void ClassiSegProba(double *sequence, int *lgSeq, int *nStep, double *res1, int 
 	
   for(k =1; k < *nStep; k++)
   {
-    for(l =0; l < *nbClasse; l++) vTmp[l]= NUMLIB_POSINF;
+    for(l =0; l < *nbClasse; l++) vTmp[l]= A_POSINF;
     for(l =0; l < *nbClasse; l++) whichCome[l]=0;
 	
     for(i=k; i < *lgSeq; i++)
     {
-      min=NUMLIB_POSINF;
+      min=A_POSINF;
       for(l =0; l < *nbClasse; l++)
       {
         indice = (*lgSeq)*(k-1)+i-1;
