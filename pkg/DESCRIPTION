@@ -4,7 +4,7 @@ Title: Segmentation methods for array CGH analysis
 Version: 1.0.0
 Depends: methods, parallel
 SystemRequirements: GNU GSL
-Date: 2010-05-20
+Date: 2012-11-08
 Author:Franck Picard, Mark Hoebeke, Emilie Lebarbier, Vincent Miele, Guillem Rigaill, Stephane Robin
 Maintainer: Franck Picard <franck.picard@univ-lyon1.fr>
 Description: cghseg is an R package dedicated to the analysis of CGH profiles using segmentation models.
