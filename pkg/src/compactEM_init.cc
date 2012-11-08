@@ -136,7 +136,9 @@ namespace cghseg
 
 
   compactEM_init::compactEM_init(int nbsegments, int nbclusters, int OMP_NUM_THREADS){
+#ifdef SUPPORT_OPENMP
     omp_set_num_threads(OMP_NUM_THREADS);
+#endif
 
     _K       = nbsegments; 
     _P       = nbclusters;
