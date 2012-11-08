@@ -69,7 +69,7 @@ Laboratoire de Biom\'etrie et Biologie Evolutive, UMR CNRS 5558 Universit\'{e} L
 
 Segmenting heterogeneous signals into regions of common characteristics is often required for biologists that face high dimensional information. This partitioning helps reducing the dimension of the data and provides guidelines for interpretation and further biological investigation. Such methods have been widely applied in Genomics, to unravel DNA sequences structures using base composition \cite{NBM02}, to segment expression profiles \cite{DHG06,NLR09}, and to determine copy-number variations based on array CGH data. Microarray CGH data analysis is certainly the field for which every possible method of segmentation have been tried. Three main categories of methods lead to many developments: Circular Binary Segmentation (CBS, \cite{OVL04}), Hidden Markov Models \cite{MTT06}, and change-point analysis \cite{picard_statistical_2005,picard_2007}. Our purpose in this work is not to compare the different methods for array CGH analysis. Such comparisons have been done elsewhere \cite{WF05}, and extensive reviews now exist on the subject \cite{S08,WPW11}. Our focus is the following: in every comparative study, change-point analysis based on Dynamic Programming (DP) has shown the best performance along with CBS \cite{bams,WF05}. The advantage of DP-based segmentation is that it provides the best global segmentation, $i.e.$ the segmentation that globally minimizes a likelihood criterion, whereas local approaches like CBS only provide local minimizers. Moreover, change-point models can also integrate a calling step that is used to cluster segments that show the same copy-number on average (also called segmentation/clustering) \cite{picard_2007,WKV07}, which has been shown to be of central importance in the segmentation process \cite{WF05}. Unfortunatelly, the algorithmic complexity of DP is proportional to the square of the signal's length, which has hampered the use of such method on high-density arrays for instance. This issue has become even more problematic when dealing with population-based or joint segmentation \cite{PLH11, TPK11,ZSJ10}. Our contribution is two-fold: first we provide a linearized version of the DP algorithm for segmentation/clustering adapting pruning strategies that have recently emerged in the field \cite{killick_optimal_2011,rigaill_2010}. Secondly we deal with the joint segmentation issue by providing a parallel version of existing algorithms implemented in the \texttt{cghseg} package. With the growing availability of multicore computers (from laptops to many-core servers), it has become essential to provide software that use every available ressource. \texttt{R} has been a tremendous plateform for package distribution, and here we provide a new version of the \texttt{cghseg} package, a \textit{next generation package} that is adaptive to available computing power. The performance of \texttt{cghseg} are impressive : segmenting 1,000 profiles of length 100,000 can now be done in few hours, which was impossible before. This makes segmentation models a new exact investigation method that can be used in routine for exploratory as well as deep analysis.
 
-\section{Linearization of Dynamic Programming for segmentation and segmentation/clustering} 
+\section{Linearization of Dynamic Programming for Segmentation and Segmentation/Clustering} 
 
 The purpose of segmentation is to partition a signal of $n$ observations $\{Y(t)\}$ into $K$ segments of homogeneous distributional parameter. In this section we deal with the univariate segmentation of one array CGH profile, the case of Joint multivariate segmentation being considered in Section 3. In the following a segment is an interval delimited by two change-points $\tau_k, \tau_{k+1}$ for instance,  with convention $\tau_0 = 1$ and $\tau_K = n+1$, and notation $r_k=\llbracket \tau_k, \tau_{k+1} -1\rrbracket$ stands for segment $k$. A segmentation in $K$ segments is denoted by $m^{(K)} = \{r_1, r_2 \ldots, r_K\}$.
 
@@ -96,7 +96,7 @@ C_{(r)}^{(K)} = \min_{m \in \mathcal{M}^{(K)}_{(r)}} \left\{ \sum_{r \in m} C^{(
 $$
 Similarly, when Approximation $\widetilde{C}_{(r)}^{(1)}$ is used (Equation (\ref{Eq:approx})), we use notations $\widetilde{C}_{(r)}^{(K)}$ and $\widetilde{m}_{(r)}^{(K)}$. When the cost of a segmentation is segment additive (which is the case in both models), a $\mathcal{O}(Kn^2)$ Dynamic Programming algorithm can be built to recover the best exact segmentation (into $1$ to $K$ segments).
 
-\subsection{Original Dynamic Programming algorithm for segmentation}
+\subsection{Original Dynamic Programming Algorithm for Segmentation}
 
 A basic statement is that the cost of a given segmentation is the sum of the cost of its segments. Thus the Bellman optimality principal holds and we have: $ C_{1, t}^{(k+1)} = \min_{\tau \leq t} \{ C_{1, \tau -1}^{(k)}  + C_{\tau, t}^{(1)} \} .$
 %More generally for any $k_1 (>0)$ and $k_2 (> 0)$   we have %$$ C_{1, t}^{(k_1 + k_2)} = min_{\tau \leq t} \{ C_{1, \tau -1}^{(k_1)}  + C_{\tau, t}^{(k_2)} \} $$
@@ -124,7 +124,7 @@ a $n$ by $n$ matrix) or that they can be efficiently computed on the fly, which 
   \end{algorithmic}
 \end{algorithm}
 
-\subsection{A linear Dynamic Programming Algorithm for the classification cost function}
+\subsection{A Linear Dynamic Programming Algorithm for the Classification Cost Function}
 
 An important consequence of using the classification cost $\widetilde{C}_{(r)}^{(1)}$ rather than ${C}_{(r)}^{(1)}$ is that the set of canditate segmentations 
 can be pruned efficently. The idea of pruning the set of candidate segmentations
@@ -190,7 +190,7 @@ All $\widetilde{C}^{(k)}_{1,1}(\mu_p)$ are initialized as $+\infty$ and $\wideti
   \end{algorithmic}
 \end{algorithm}
 
-\subsection{A bound on the quality of the approximation }
+\subsection{A Bound on the Quality of the Approximation }
 Using the approximation defined in Equation \ref{Eq:approx} we can guarantee the quality of the obtained segmentation using the following theorem.
 \begin{theo}
 Using approximation defined in Equation \ref{Eq:approx} we have for all segments $R$ and $K$
@@ -226,7 +226,7 @@ Similarly we get:
 
 Applying Equation \ref{equation:boundproof1} to $m = \widehat{m}_{t_1, t_2}^{(K)}$ and then Equation \ref{equation:boundproof2} to $m =  \widetilde{m}_{t_1, t_2}^{(K)}$ we get the theorem. $\blacksquare$
 
-\section{Joint Segmentation and Parallelization of the algorithm}
+\section{Joint Segmentation and Parallelization of the Algorithm}
 
 Joint segmentation arises when more than one profile should be segmented jointly. We make the distinction between simultaneous segmentation, where all breakpoints are the sames across profiles, with joint segmentation where all profiles have their own specific breakpoints, but may share some characteristics, like the same noise, the same biases, the same values for the mean of segments that share the same copy numbers ($i.e.$ parameters $\mu_p$). When segmenting $I$ profiles jointly, a typical model is: 
 $$
@@ -251,17 +251,17 @@ Joint segmentation presents an additional algorithmic challenge. When each $K_i$
   \end{algorithmic}
 \end{algorithm}
 
-\section{Correctness, Computational footprint and scalability}
+\section{Correctness, Computational Footprint and Scalability}
 
 All the presented algorithms are available into the \esoft \texttt{R}-package\footnote{\url{http://cran.r-project.org/web/packages/cghseg}} , which now relies on the \texttt{parallel} \texttt{R}-package and on the shared memory programming standard \texttt{openMP} in the \texttt{C++} sections. The new package is now designed to be executed in parallel on multiprocessor architectures. 
 
-We recall that the statistical performance of the model have been discussed elsewhere \cite{PLH11}, so that our focus here is computational only. Consequently, we use a previously published simulation scheme to generate the data \cite{PLH11,POA09} with $n=20,000$ observations per profile, and a number of profiles varying in $256, 512$ and $1024$. The average number of segments is set to $10$ for each profile, and the Signal to Noise Ratio is set to $5$ (which corresponds to  moderately easy configurations). 
+We recall that the statistical performance of the model have been discussed elsewhere \cite{PLH11}, so that our focus here is computational only. Consequently, we use a previously published simulation scheme to generate the data \cite{PLH11,POA09} with $n=20,000$ observations per profile, and a number of profiles of $256, 512$ and $1024$. The average number of segments is set to $10$ for each profile, and the Signal to Noise Ratio is set to $5$ (which corresponds to  moderately easy configurations \cite{PLH11}). 
 
-We first check the correctness of our method, by verifying that the linearization approximations (with and without calling) give the same statistical performance (Tab. \ref{Tab:stat}), which means that our new package shows the same quality as the older version. 
+We first check the correctness of our method, by verifying that the linearization approximations (with and without calling) give the same statistical performance compared with the non-linearized version. This is shown in Table \ref{Tab:stat}), as the performance are identical over 50 replicates.
 
 Then we assess the effectiveness of the parallel implementation by running \texttt{cghseg} on an increasing number of cores $(1,2,4,16,32,48)$. When dealing with parallelized codes, the Amdahl's law \cite{AG67} provides the expected theoretical speedup with respect to the time proportion of the sequential part and the number of cores. The speedup of \texttt{cghseg} exactly follows the Amdahl's law when the number of profiles is high (Fig.\ref{figspeedup}, dashed lines), which demonstrates the quality of our implementation as the Amdahl's law constitutes the best possible speedup. However, we observe an unexpected moderate speedup decrease for a lower number of profiles. This is due to overheads associated with the use of the \texttt{parallel} \texttt{R}-package, overheads which become negligible when the number of profiles is high. Still, the execution time of configurations with $256$ profiles is $6$ minutes on average using $48$ cores, which remains excellent. 
 
-While the main interest of \esoft lies in the quality of its results, the associated computational expense is affordable even for very large datasets. As a benchmark, we simulated datasets with $1024$ profiles of length $100,000$ which corresponds to the up-to-date limits of the available datasets of SNP-arrays for instance. The execution time depends on the calling step: if no calling is performed, \esoft required less than half an hour to jointly segment this dataset using $48$ cores. When joint segmentation is performed along with calling, \texttt{cghseg} required $4$h on average on $48$ cores (see Table \ref{tabtime}). This increase is linked to the use of all profiles for the calling step, which greatly improves the statistical power of the procedure. Lastly, due to the {\it copy-on-write} mechanism  of the \texttt{parallel} \texttt{R}-package that avoids memory copy between processes, and thanks to the shared memory efficiency provided by \texttt{openMP}, the memory needs of \texttt{cghseg} only correspond to the dataset under study (see Table \ref{tabtime}). Therefore, our method and software package are adapated to the next generation of computers (many cores) and experiments (large profiles).
+While the main interest of \esoft lies in the quality of its results, the associated computational expense is affordable even for very large datasets. As a benchmark, we simulated datasets with $1024$ profiles of length $100,000$ which corresponds to the up-to-date limits of the available datasets of SNP-arrays for instance. When joint segmentation is performed along with calling, \texttt{cghseg} required $4$h on average on $48$ cores (see Table \ref{tabtime}), which is very reasonable considering the size of the dataset. Lastly, due to the {\it copy-on-write} mechanism  of the \texttt{parallel} \texttt{R}-package that avoids memory copy between processes, and thanks to the shared memory efficiency provided by \texttt{openMP}, the memory needs of \texttt{cghseg} only correspond to the dataset under study (see Table \ref{tabtime}). Therefore, our method and software package are adapated to the next generation of computers (many cores) and experiments (large profiles).
 
 \begin{table}[ht]
 \begin{center}
@@ -318,7 +318,7 @@ SNR  &  $\text{CI}_{\text{new}}(\widehat{\text{K}})$ & $\text{CI}_{\text{old}}(\
 \end{document}
 
 
-\section{Linearized Dynamic Programming to segment individual profiles}
+\section{Linearized Dynamic Programming to Segment Individual Profiles}
 \subsection{Background / Notations}
 We consider a signal of length $n$, $\{X_i\}_{i \leq n}$ with $X_i \in \mathbf{R}$.
 A segment $r$ is delimited by two change-points and is denoted
