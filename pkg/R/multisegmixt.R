@@ -11,6 +11,10 @@ setMethod(f = "multisegmixt",signature = "CGHdata",
 				#cat("multisegmixt //                         \r")	
 				if (Sys.info()["sysname"] == "Windows"){ 				
 					unisegmixt.proxy <- function(m){
+						Y.ref	 	= get("Y.ref", envir = .GlobalEnv)
+						CGHo.ref	= get("CGHo.ref", envir = .GlobalEnv)
+						uniKmax.ref	= get("uniKmax.ref", envir = .GlobalEnv)
+						phi.ref		= get("phi.ref", envir = .GlobalEnv)
 						n     = length(which(!is.na(Y.ref[[m]])))
 						Kmax  = uniKmax.ref[[m]]
 						out   = unisegmixt(Y.ref[[m]],CGHo.ref,Kmax,phi.ref)
@@ -20,7 +24,8 @@ setMethod(f = "multisegmixt",signature = "CGHdata",
 					environment(unisegmixt.proxy) <- .GlobalEnv
 					clusterExport(CGHo@cluster, "unisegmixt")	# to be know in unisegmixt.proxy
 					assign("phi.ref", phi, envir = .GlobalEnv)
-					clusterExport(CGHo@cluster, "phi.ref")			
+					clusterExport(CGHo@cluster, "phi.ref")
+					Y.ref	 	= get("Y.ref", envir = .GlobalEnv)			
 					Res = parLapply(CGHo@cluster, names(Y.ref), fun = unisegmixt.proxy)
 					names(Res) = names(.Object@Y)
 				}

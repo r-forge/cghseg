@@ -21,7 +21,7 @@
 
 void Liste::show()
 {
-        std::cout << "Max : " << this->getMax() << ", Min : " << this->getMin()<< std::endl;
+        //std::cout << "Max : " << this->getMax() << ", Min : " << this->getMin()<< std::endl;
         this->poly->show();
 }
 void Liste::showAllNext()

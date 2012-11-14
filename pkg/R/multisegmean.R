@@ -12,6 +12,9 @@ setMethod(f = "multisegmean",signature = "CGHdata",
 				#cat("multisegmean //               \r")	
 				if (Sys.info()["sysname"] == "Windows"){   			
 					unisegmean.proxy <- function(m){
+						Y.ref						= get("Y.ref", envir = .GlobalEnv)
+						CGHo.ref					= get("CGHo.ref", envir = .GlobalEnv)
+						uniKmax.ref					= get("uniKmax.ref", envir = .GlobalEnv)
 						n                           = length(which(!is.na(Y.ref[[m]])))
 						Kmax                        = uniKmax.ref[[m]]
 						out                         = unisegmean(Y.ref[[m]],CGHo.ref,Kmax)
