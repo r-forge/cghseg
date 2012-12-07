@@ -1,6 +1,7 @@
 setMethod(f = "golden.search",signature = "CGHdata",
           definition = function(.Object,CGHo,uniKmax,multiKmax){
 
+            
             P          = CGHo["nblevels"]
             M          = length(names(.Object@Y))
             n          = lapply(.Object@Y,FUN = function(y){length(y[!is.na(y)])}) 
@@ -13,8 +14,8 @@ setMethod(f = "golden.search",signature = "CGHdata",
 			
             Kmax         = multiKmax-M+1
             per          = 2  #percent
-            Kseq1        = seq(0,Kmax,by=floor((Kmax-1)/floor(per*Kmax/100)))+M  #K=Kmin:Kmax
-            Kseq1[1]     = M+1 
+            #Kseq1        = seq(0,Kmax,by=floor((Kmax-1)/floor(per*Kmax/100)))+M  #K=Kmin:Kmax
+            Kseq1        = c((M+1):Kmax)
             select(CGHo) = select.tmp
             
             a         = 1
@@ -76,7 +77,7 @@ setMethod(f = "golden.search",signature = "CGHdata",
               xseq=c(xseq,c(x,s))
               Jseq=c(Jseq,c(Jx,Js))
             }
-            plot(xseq,Jseq)
+#            plot(xseq,Jseq)
             gc()
             rg  = 1:length(Kseq)
             Kh  = Kseq[which((rg>=s) & (rg<=x))]
