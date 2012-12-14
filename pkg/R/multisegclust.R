@@ -1,6 +1,6 @@
 setMethod(f = "multisegclust",signature = "CGHdata",
           definition = function(.Object,CGHo,uniKmax,multiKmax){			  
-            
+
             P            = CGHo["nblevels"]
             tol          = 1e-2
             select.tmp   = CGHo["select"]
