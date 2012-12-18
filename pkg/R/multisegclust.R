@@ -32,7 +32,7 @@ setMethod(f = "multisegclust",signature = "CGHdata",
             mu.test   = ILSclust.output(.Object,mu,out.EM$phi,out.EM$tau)
 	    mu.tmp    = mu.test	
             
-            while ( (eps > tol) & (iter < CGHo@itermax) ){   
+            while ( (eps > tol) & (iter < CGHo@itermax) & (out.EM$empty==0)){   
               iter       = iter+1 
               mu         = multisegmixt(.Object,CGHo,uniKmax,multiKmax,out.EM$phi)$mu
               out.DP2EM  = DP2EM(.Object,mu)
@@ -42,7 +42,10 @@ setMethod(f = "multisegclust",signature = "CGHdata",
 	      mu.tmp     = mu.test
             } # end while
 			
-            
+            if (out.EM$empty!=0){
+              cat("[multisegclust ERROR]: convergence to a solution with empty levels.","\n");
+              stop("[multisegclust ERROR]: try a lower nblevels(CGHo)","\n");
+            }
 ######   output   #####################################################################
             out.DP2EM    = DP2EM(.Object,mu)
             loglik       = quicklvinc(out.DP2EM$xk,out.DP2EM$x2k,out.EM$phi,out.DP2EM$nk,P,vh=TRUE)$lvinc
