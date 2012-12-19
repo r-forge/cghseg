@@ -1,8 +1,3 @@
-setClass("SOCKcluster")
-setClass("cluster")
-setClassUnion("parallelCluster", c("SOCKcluster", "cluster"))
-
-
 setClass("CGHoptions",
          representation=list(
            select    = 'character',
@@ -13,7 +8,6 @@ setClass("CGHoptions",
            alpha     = 'numeric',
            beta      = 'numeric',
            nbprocs   = 'numeric',
-           cluster   = 'parallelCluster',
            itermax   = 'numeric'),
          prototype(select    = "mBIC",
                    calling   = FALSE,
@@ -23,7 +17,6 @@ setClass("CGHoptions",
                    alpha     = 0.2,
                    beta      = 0.5,
                    nbprocs   = 1,
-                   cluster = makeCluster(getOption("cl.cores", 0)),
                    itermax   = Inf)
          )
 
@@ -39,7 +32,6 @@ setMethod(
             if (i=="alpha")      {return(x@alpha)}       else {}
             if (i=="beta")       {return(x@beta)}        else {}
             if (i=="nbprocs")    {return(x@nbprocs)}     else {}
-            if (i=="cluster")    {return(x@cluster)}     else {}
             if (i=="itermax")    {return(x@itermax)}     else {}
           }          
           )
@@ -173,17 +165,6 @@ setReplaceMethod(
                    return (object)
                  }
                  )
-				 
-setGeneric("cluster<-",function(object,value){standardGeneric("cluster<-")})
-setReplaceMethod(
-				 f="cluster",
-				 signature="CGHoptions",
-				 definition=function(object,value){
-					 object@cluster =value
-					 return (object)
-				 }
-				 )
-				 				 				
 setGeneric("itermax<-",function(object,value){standardGeneric("itermax<-")})
 setReplaceMethod(
                  f="itermax",
