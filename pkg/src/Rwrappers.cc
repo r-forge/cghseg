@@ -10,7 +10,7 @@ using namespace std;
 #include "compactEM_algo.h"
 #include "EM_init.h"
 #include "compactEM_init.h"
-/*#include "compactEM_init_Reg.h"*/
+#include "compactEM_init_Reg.h"
 #include "hybrid.h"
 #include "logdens.h"
 #include "Segmentation_mean.h"
@@ -691,7 +691,7 @@ SEXP sc_compactEMinit(SEXP xkR, SEXP x2kR,SEXP nkR, SEXP KR, SEXP PR, SEXP OMP_N
 }
 
 
-/*SEXP sc_compactEMinit_Reg(SEXP xkR, SEXP x2kR,SEXP ykR, SEXP y2kR, SEXP xykR, SEXP nkR, SEXP KR, SEXP PR, SEXP OMP_NUM_THREADSR, SEXP vhR)
+SEXP sc_compactEMinit_Reg(SEXP xkR, SEXP x2kR,SEXP ykR, SEXP y2kR, SEXP xykR, SEXP nkR, SEXP KR, SEXP PR, SEXP OMP_NUM_THREADSR, SEXP vhR)
 {
   
   SEXP res;
@@ -746,7 +746,7 @@ SEXP sc_compactEMinit(SEXP xkR, SEXP x2kR,SEXP nkR, SEXP KR, SEXP PR, SEXP OMP_N
   delete[] datank;
   
   return res;
-  }*/
+  }
 
 
 
